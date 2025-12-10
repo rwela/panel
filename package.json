@@ -1,0 +1,30 @@
+{
+  "name": "talorix",
+  "version": "1.0.0",
+  "description": "can we replace pterodactyl forever? like can we? everything is not impossible",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo works"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HydrenFOSS/Talorix.git"
+  },
+  "keywords": [
+    "panel",
+    "pterodactyl"
+  ],
+  "author": "HydrenLABS",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/HydrenFOSS/Talorix/issues"
+  },
+  "homepage": "https://github.com/HydrenFOSS/Talorix#readme",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.11",
+    "ws": "^8.18.3"
+  }
+}
