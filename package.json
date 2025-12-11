@@ -4,7 +4,7 @@
   "description": "can we replace pterodactyl forever? like can we? everything is not impossible",
   "main": "index.js",
   "scripts": {
-    "test": "echo works"
+    "admin": "node exec/adminsys"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,9 @@
     "axios": "^1.13.2",
     "ejs": "^3.1.10",
     "express": "^5.2.1",
+    "express-session": "^1.18.2",
     "nodemon": "^3.1.11",
+    "prompts": "^2.4.2",
     "ws": "^8.18.3"
   }
 }

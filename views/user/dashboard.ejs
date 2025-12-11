@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
+<head>
+  <meta charset="UTF-8">
+  <title><%= name %> - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex">
+
+  <!-- Sidebar -->
+  <%- include('../components/sidebar', { name: name, user: user }) %>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8 overflow-auto">
+    <div class="max-w-6xl mx-auto space-y-8">
+
+      <!-- Welcome Section -->
+      <div class="bg-neutral-950 border border-neutral-900 p-4 rounded-2xl shadow-lg">
+        <h1 class="text-3xl font-bold">👋 Welcome back, <%= user.username %>!</h1>
+      </div>
+
+      <!-- Servers Section -->
+      <div class="space-y-4">
+      <div class="bg-neutral-950 border border-neutral-900 shadow-xl rounded-2xl p-6">
+        <h2 class="text-2xl font-semibold mb-4">Your Servers</h2>
+
+        <% if (user.servers && user.servers.length > 0) { %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 border border-neutral-900">
+          <% user.servers.forEach(server => { %>
+          <div class="bg-neutral-800 border border-neutral-700 rounded-2xl p-6 hover:border-indigo-500 hover:shadow-xl transition-all">
+            <div class="flex justify-between items-start mb-4">
+              <h3 class="text-xl font-semibold"><%= server.name %></h3>
+              <span class="text-sm text-gray-400">ID: <%= server.id %></span>
+            </div>
+            <p class="text-gray-300 mb-1"><strong>Node:</strong> <%= server.node.name %></p>
+            <p class="text-gray-300 mb-1"><strong>IP:</strong> <%= server.node.address %>:<%= server.port %></p>
+            <button class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl transition-colors">
+              Manage
+            </button>
+          </div>
+          <% }) %>
+        </div>
+        <% } else { %>
+        <p class="text-gray-400">No servers added yet.</p>
+        <% } %>
+      </div>
+</div> 
+    </div>
+  </main>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
