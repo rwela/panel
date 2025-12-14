@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
+<head>
+  <meta charset="UTF-8">
+  <title><%= name %> - <%= server.name %> File</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Monaco Editor -->
+  <script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
+</head>
+
+<body class="min-h-screen flex">
+
+  <!-- Sidebar -->
+  <%- include('../components/sidebar', { name: name, user: user }) %>
+
+  <main class="flex-1 p-8 overflow-auto">
+    <div class="max-w-6xl mx-auto space-y-6">
+
+      <!-- Header -->
+      <div class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl shadow-lg flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold flex items-center gap-2">
+            <i data-lucide="file-text"></i>
+            <%= location %>
+          </h1>
+          <p class="text-gray-400 mt-1">
+            Server: <%= server.name %>
+          </p>
+        </div>
+
+        <a
+          href="/server/files/<%= server.id %>?path=<%= encodeURIComponent(location.split('/').slice(0,-1).join('/') || '/') %>"
+          class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-xl flex items-center gap-2"
+        >
+          <i data-lucide="arrow-left"></i> Back
+        </a>
+      </div>
+
+      <!-- Editor Container -->
+      <div class="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden">
+        <div class="border-b border-neutral-800 px-4 py-2 text-sm text-gray-400 flex items-center gap-2">
+          <i data-lucide="code"></i> Talorix Editor | Powered by monaco-editor
+        </div>
+
+        <div id="editor" class="h-[70vh]"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-2">
+        <button
+          id="saveBtn"
+          class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl flex items-center gap-2"
+        >
+          <i data-lucide="save"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+<script>
+ lucide.createIcons();
+
+  const filename = "<%= location.split('/').pop() %>";
+
+  function getLanguageFromFilename(filename) {
+    if (!filename.includes('.')) return 'plaintext';
+
+    const ext = filename.split('.').pop().toLowerCase();
+
+    const map = {
+      js: 'javascript',
+      ts: 'typescript',
+      json: 'json',
+      html: 'html',
+      css: 'css',
+      scss: 'scss',
+      md: 'markdown',
+      yml: 'yaml',
+      yaml: 'yaml',
+      py: 'python',
+      sh: 'shell',
+      bash: 'shell',
+      php: 'php',
+      go: 'go',
+      java: 'java',
+      c: 'c',
+      cpp: 'cpp',
+      rs: 'rust',
+      sql: 'sql'
+    };
+
+    return map[ext] || 'plaintext';
+  }
+
+  const language = getLanguageFromFilename(filename);
+
+  require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@0.45.0/min/vs' } });
+
+  let editor;
+
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(document.getElementById('editor'), {
+      value: `<%- JSON.stringify(content).slice(1, -1) %>`,
+      language,
+      theme: 'vs-dark',
+      automaticLayout: true,
+      fontSize: 14,
+      minimap: { enabled: false }
+    });
+  });
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    const content = editor.getValue();
+
+    const res = await fetch(
+      `/server/files/<%= server.id %>/new-file?path=<%= encodeURIComponent(location.split('/').slice(0,-1).join('/') || '/') %>`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: "<%= location.split('/').pop() %>",
+          content
+        })
+      }
+    );
+
+    if (res.ok) {
+      alert("File saved successfully");
+    } else {
+      alert("Failed to save file");
+    }
+  });
+</script>
+
+</body>
+</html>
