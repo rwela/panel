@@ -241,6 +241,30 @@ router.get("/admin/images/new", requireAuth, requireAdmin, (req, res) => {
 });
 
 /**
+ * GET /admin/images/export/:id
+ * Export a single image as JSON
+ */
+router.get("/admin/images/export/:id", requireAuth, requireAdmin, (req, res) => {
+  const image = unsqh.get("images", req.params.id);
+  if (!image) return res.status(404).send("Image not found");
+
+  const exportData = {
+    dockerImage: image.dockerImage,
+    name: image.name,
+    description: image.description,
+    envs: image.envs,
+    files: image.files
+  };
+
+  const jsonStr = JSON.stringify(exportData, null, 2);
+
+  res.setHeader("Content-Disposition", `attachment; filename="${image.name.replace(/\s+/g, '_')}.json"`);
+  res.setHeader("Content-Type", "application/json");
+
+  res.send(jsonStr);
+});
+
+/**
  * POST /admin/images/new
  * Create a new image
  * body: { dockerImage, name, description, envs, files }
@@ -334,9 +358,11 @@ router.get("/admin/servers/new", requireAuth, requireAdmin, (req, res) => {
  * body: { imageId, nodeId, name, ram, core, port, userId }
  */
 router.post("/admin/servers/new", requireAuth, requireAdmin, async (req, res) => {
-  const { imageId, nodeId, name, ram, core, port, userId } = req.body;
-  if (!imageId || !nodeId || !name || !userId)
+  const { imageId, nodeId, name, ram, core, port, userId, env = {} } = req.body;
+
+  if (!imageId || !nodeId || !name || !userId) {
     return res.status(400).json({ error: "Missing fields" });
+  }
 
   const node = unsqh.get("nodes", nodeId);
   if (!node) return res.status(404).json({ error: "Node not found" });
@@ -347,26 +373,45 @@ router.post("/admin/servers/new", requireAuth, requireAdmin, async (req, res) =>
   const targetUser = unsqh.get("users", userId);
   if (!targetUser) return res.status(404).json({ error: "User not found" });
 
-  try {
-    // Deploy container on node
-    const response = await axios.post(`http://${node.ip}:${node.port}/server/create?key=${node.key}`, {
-      dockerimage: image.dockerImage,
-      env: image.envs,
-      name,
-      ram,
-      core,
-      port,
-      files: image.files
+  const finalEnv = {};
+  for (const key of Object.keys(image.envs || {})) {
+    finalEnv[key] = env[key] ?? image.envs[key];
+  }
+
+  const interpolateEnv = (str, envObj = {}) => {
+    if (typeof str !== "string") return str;
+    return str.replace(/\$\{(\w+)\}/g, (_, key) => {
+      return envObj[key] ?? process.env[key] ?? "";
     });
+  };
+
+  try {
+    const resolvedFiles = (image.files || []).map(file => ({
+      ...file,
+      url: interpolateEnv(file.url, finalEnv),
+      name: interpolateEnv(file.name, finalEnv)
+    }));
+
+    const response = await axios.post(
+      `http://${node.ip}:${node.port}/server/create?key=${node.key}`,
+      {
+        dockerimage: image.dockerImage,
+        env: finalEnv,
+        name,
+        ram,
+        core,
+        port,
+        files: resolvedFiles
+      }
+    );
 
     const { containerId, idt } = response.data;
 
-    // Build server object
     const serverId = crypto.randomUUID();
     const serverData = {
       id: serverId,
       userId,
-      node: node ? { ip: node.ip, name: node.name } : null,
+      node: { ip: node.ip, name: node.name },
       imageId,
       name,
       ram,
@@ -374,20 +419,19 @@ router.post("/admin/servers/new", requireAuth, requireAdmin, async (req, res) =>
       port,
       containerId,
       idt,
+      env: finalEnv,
       createdAt: Date.now()
     };
 
-    // Save server in admin servers table
     unsqh.put("servers", serverId, serverData);
 
-    // Save server in user's servers array
     targetUser.servers = targetUser.servers || [];
     targetUser.servers.push(serverData);
     unsqh.update("users", userId, { servers: targetUser.servers });
 
     res.json({ success: true, server: serverData });
   } catch (err) {
-    console.error("Failed to deploy server:", err.message);
+    console.error("Failed to deploy server:", err);
     res.status(500).json({ error: "Failed to deploy server" });
   }
 });
