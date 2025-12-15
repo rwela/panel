@@ -4,238 +4,531 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= name %> - <%= server.name %></title>
+
+    <!-- Tailwind (user preference: script src=tailwindcss) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
+      /* Combined log container styles */
       #logContainer {
         scroll-behavior: smooth;
         font-family: Figtree, monospace;
+        overflow-y: auto;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      #logContainer::-webkit-scrollbar {
+        display: none;
       }
     </style>
   </head>
+
   <body class="min-h-screen flex">
     <!-- Sidebar -->
     <%- include('../components/sidebar', { name: name, user: user }) %>
 
     <main class="flex-1 p-8 overflow-auto">
       <div class="max-w-6xl mx-auto space-y-6">
-        <!-- Server Header -->
-        <div
-          class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl shadow-lg flex justify-between items-center"
-        >
-          <div>
-            <h1 class="text-3xl font-bold flex items-center gap-2">
-              <i data-lucide="server" class="text-neutral-100"></i> <%=
-              server.name %>
-            </h1>
-            <p class="text-gray-400 mt-1">
-              Node: <%= server.node?.name || 'Unknown' %> | IP: <%=
-              server.node?.ip || '0.0.0.0' %>:<%= server.port %>
-            </p>
+        <!-- Header card -->
+        <div class="bg-neutral-950 border border-neutral-900 rounded-2xl px-6 py-4 flex items-center justify-between">
+          <!-- LEFT INFO -->
+          <div class="flex items-start gap-3">
+            <!-- Status dot -->
+            <span id="status-dot" class="mt-2"></span>
+
+            <div class="leading-tight">
+              <p class="text-lg font-semibold text-gray-100"><%= server.name %></p>
+              <p class="text-sm text-gray-400">
+                <%= server.node?.ip || '0.0.0.0' %>:<%= server.port %>
+                <span class="mx-1">•</span>
+                <%= server.node?.name || 'unknown' %>
+              </p>
+            </div>
           </div>
-          <div>
-            <span id="status" class="flex items-center gap-2 text-green-400">
-              <i data-lucide="heart-pulse" class="w-5 h-5 animate-pulse"></i>
-              Connecting....
-            </span>
+
+          <!-- RIGHT ACTIONS -->
+          <div id="power-actions" class="flex items-center gap-3 text-sm font-medium">
+            <button data-action="start" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-900/40 text-emerald-400 hover:bg-emerald-900/60 disabled:opacity-40 disabled:cursor-not-allowed">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              Start
+            </button>
+
+            <button data-action="restart" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-800 text-gray-300 hover:bg-neutral-700 disabled:opacity-40 disabled:cursor-not-allowed">
+              <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+              Restart
+            </button>
+
+            <button data-action="stop" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-900/40 text-red-400 hover:bg-red-900/60 disabled:opacity-40 disabled:cursor-not-allowed">
+              <i data-lucide="square" class="w-4 h-4"></i>
+              Stop
+            </button>
           </div>
+        </div>
+
+        <!-- Node down banner -->
+        <div id="systemnodedown" class="bg-red-700 text-gray-100 p-4 rounded-2xl flex items-center gap-3 mb-4 hidden">
+          <svg class="animate-spin w-5 h-5 text-red-100" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          <span>System is having trouble connecting to the node. Please wait...</span>
         </div>
 
         <%- include('../components/server_nav', { server: server.id }) %>
 
-        <!-- Custom Terminal -->
-        <div
-          id="terminal"
-          class="bg-[#080808] border border-[#d4d4d4]/20 rounded-2xl h-96 flex flex-col"
-        >
-          <div
-            id="logContainer"
-            class="flex-1 overflow-y-auto p-4 text-[#d4d4d4] text-sm space-y-1"
-          ></div>
-          <div class="p-4 border-t border-[#d4d4d4]/20 flex gap-2">
-            <input
-              id="cmdInput"
-              type="text"
-              placeholder="Type a command..."
-              class="flex-1 bg-[#080808] border border-[#d4d4d4]/20 rounded px-3 py-2 text-[#d4d4d4] font-mono focus:outline-none focus:ring-2 focus:ring-[#d4d4d4]/50"
-            />
-            <button
-              id="sendBtn"
-              class="bg-[#d4d4d4]/20 text-[#080808] px-4 py-2 rounded font-semibold hover:bg-[#d4d4d4]/30 transition active:scale-95"
-            >
-              Send
-            </button>
+        <!-- Custom Terminal + Charts -->
+        <div class="flex gap-4 h-96">
+          <!-- Terminal -->
+          <div id="terminal" class="flex-1 bg-[#080808] border border-[#d4d4d4]/20 rounded-2xl flex flex-col overflow-hidden">
+            <div id="logContainer" class="flex-1 p-4 text-[#d4d4d4] text-sm space-y-1"></div>
+
+            <div class="p-4 border-t border-[#d4d4d4]/20 flex gap-2">
+              <input id="cmdInput" type="text" placeholder="Type a command..." class="flex-1 bg-[#080808] border border-[#d4d4d4]/20 rounded px-3 py-2 text-[#d4d4d4] font-mono focus:outline-none focus:ring-2 focus:ring-[#d4d4d4]/50" />
+              <button id="sendBtn" class="bg-[#d4d4d4]/20 text-[#080808] px-4 py-2 rounded font-semibold hover:bg-[#d4d4d4]/30 transition active:scale-95">Send</button>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="w-80 flex flex-col gap-4">
+            <canvas id="cpuChart" class="bg-neutral-950 border border-neutral-800 rounded-xl p-2"></canvas>
+            <canvas id="ramChart" class="bg-neutral-950 border border-neutral-800 rounded-xl p-2"></canvas>
           </div>
         </div>
+
+        <!-- Modal wrapper -->
+        <div id="confirm-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+          <!-- Overlay -->
+          <div id="confirm-overlay" class="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm transition-opacity duration-200"></div>
+
+          <!-- Modal panel -->
+          <div id="confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirm-title" class="relative z-10 max-w-lg w-full mx-4 rounded-2xl bg-neutral-950 text-gray-100 shadow-xl ring-1 ring-black/10 overflow-hidden transform transition-all duration-200 ease-out scale-95 opacity-0 border border-neutral-900">
+            <div class="p-6">
+              <div class="flex items-start gap-4">
+                <i id="confirm-icon" data-lucide="alert-triangle" class="w-8 h-8 text-yellow-600"></i>
+                <div class="flex-1">
+                  <h2 id="confirm-title" class="text-lg font-semibold">Confirm action</h2>
+                  <p id="confirm-message" class="mt-1 text-sm text-neutral-300">Are you sure you want to proceed? This action cannot be undone.</p>
+                </div>
+              </div>
+
+              <div id="confirm-details" class="mt-4 text-xs text-neutral-300"></div>
+
+              <div class="mt-6 flex justify-end gap-3">
+                <button id="confirm-cancel" class="px-4 py-2 rounded-lg text-neutral-800 bg-gray-100 hover:bg-gray-200">Cancel</button>
+                <button id="confirm-action" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-red-600 hover:bg-red-700 text-white">
+                  <i id="confirm-action-icon" data-lucide="trash" class="w-4 h-4"></i>
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+          // --- DOM refs ---
+          const logContainer = document.getElementById('logContainer');
+
+          // 20-point sliding window for charts
+          const labels = Array(20).fill('');
+
+          // Show/hide the "node down" banner
+          function nodeoff(isVisible) {
+            const banner = document.getElementById('systemnodedown');
+            banner.classList.toggle('hidden', !isVisible);
+          }
+
+          const logColors = {
+            INFO: '#d4d4d4',
+            WARN: '#f59e0b',
+            ERROR: '#ef4444',
+            SYSTEM: '#10b981',
+            POWER: '#fbbf24',
+            COMMAND: '#3b82f6',
+            DAEMON: '#8b5cf6'
+          };
+
+          function hexToAlpha(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r},${g},${b},${alpha})`;
+          }
+
+          function stripAnsiCodes(str) {
+            return str.replace(/\x1b\[[0-9;]*m/g, '');
+          }
+
+          function ansiToHtml(msg) {
+            // Keep only SGR (m) sequences for color/bold — other sequences removed
+            msg = msg.replace(/\x1b\[([0-9;?]*)([A-Za-z])/g, (match, codes, command) => {
+              return command === 'm' ? match : '';
+            });
+
+            const colorMap = {
+              30: 'black', 31: 'red', 32: 'green', 33: 'orange', 34: 'blue', 35: 'magenta', 36: 'cyan', 37: 'white',
+              90: 'gray', 91: 'lightcoral', 92: 'lightgreen', 93: 'yellow', 94: 'lightblue', 95: 'violet', 96: 'lightcyan', 97: 'white'
+            };
+
+            return msg
+              .replace(/\x1b\[([0-9;]+)m/g, (match, codes) => {
+                const parts = codes.split(';');
+                let color = null;
+                let bold = false;
+                for (const p of parts) {
+                  if (p === '1') bold = true;
+                  else if (colorMap[p]) color = colorMap[p];
+                }
+                if (color) return `<span style="color:${color};${bold ? 'font-weight:bold' : ''}">`;
+                return '</span>';
+              })
+              .replace(/\x1b\[m/g, '</span>')
+              .replace(/\r/g, '')
+              .replace(/\n/g, '<br>');
+          }
+
+          function parseServerMessage(msg) {
+            msg = msg.replace(/^[>=\.]+ ?/g, '').trim();
+            const timestampRegex = /^\[(\d{2}:\d{2}:\d{2}) (\w+)\]:\s*(.*)$/;
+            const tsMatch = msg.match(timestampRegex);
+            if (tsMatch) {
+              return { type: tsMatch[2].toUpperCase(), text: msg };
+            }
+
+            const typeRegex = /^(\w+)\s+(.*)$/;
+            const typeMatch = msg.match(typeRegex);
+            if (typeMatch && ['INFO', 'WARN', 'ERROR', 'SYSTEM', 'DAEMON', 'COMMAND', 'POWER'].includes(typeMatch[1].toUpperCase())) {
+              return { type: typeMatch[1].toUpperCase(), text: msg };
+            }
+
+            return { type: 'INFO', text: msg };
+          }
+
+          function addLog(type, message) {
+            const logLine = document.createElement('div');
+            logLine.classList.add('whitespace-pre');
+
+            const text = document.createElement('span');
+            text.innerHTML = ansiToHtml(message);
+
+            logLine.appendChild(text);
+            logContainer.appendChild(logLine);
+
+            logContainer.scrollTop = logContainer.scrollHeight;
+          }
+
+          // --- WebSockets ---
+          const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+          const serverId = '<%= server.id %>';
+          const containerId = '<%= server.containerId %>';
+          let consoleWs;
+
+          function ccws() {
+            consoleWs = new WebSocket(`${protocol}://${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/console/${serverId}`);
+
+            consoleWs.onmessage = (evt) => {
+              let data;
+              try {
+                data = JSON.parse(evt.data);
+              } catch (err) {
+                const fallback = parseServerMessage(evt.data);
+                addLog(fallback?.type || 'LOG', `${fallback?.text}`);
+                return;
+              }
+
+              let parsedPayload;
+              if (typeof data.payload === 'string') parsedPayload = parseServerMessage(data.payload);
+              else return; // ignore non-string payloads for logs
+
+              nodeoff(false);
+
+              try {
+                if (data.event === 'cmd' || data.event === 'error') {
+                  addLog(parsedPayload.type, parsedPayload.text);
+                } else if (data.event && data.event.startsWith('power')) {
+                  addLog('POWER', data.payload);
+                } else {
+                  addLog('INFO', `Unhandled event: ${data.event}`);
+                }
+              } catch (err) {
+                console.error('Error processing message:', err, evt.data);
+              }
+            };
+
+            consoleWs.onclose = () => {
+              addLog('', '\u001b[31m[talorix] \x1b[0mDisconnected from WebSocket. Attempting to Reconnect in 2 seconds');
+              nodeoff(true);
+
+              setTimeout(() => ccws(), 2000);
+            };
+
+            consoleWs.onerror = () => addLog('ERROR', 'WebSocket error');
+          }
+
+          ccws();
+
+          let statsWs;
+          function csws() {
+            statsWs = new WebSocket(`${protocol}://${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/stats/${serverId}`);
+
+            statsWs.onmessage = (evt) => {
+              nodeoff(false);
+              try {
+                const stats = JSON.parse(evt.data);
+                updateStatus(stats);
+              } catch (err) {
+                console.error('Invalid stats data:', evt.data);
+              }
+            };
+
+            statsWs.onclose = () => {
+              addLog('DAEMON', '\u001b[31m[talorix] \x1b[0mDisconnected from Stats WebSocket. Reconnecting in 2 seconds');
+              setTimeout(() => csws(), 2000);
+            };
+
+            statsWs.onerror = () => addLog('ERROR', 'Stats WebSocket error');
+          }
+
+          csws();
+
+          // Send command button
+          document.getElementById('sendBtn').addEventListener('click', () => {
+            const input = document.getElementById('cmdInput');
+            const cmd = input.value.trim();
+            if (!cmd || typeof consoleWs === 'undefined' || consoleWs.readyState !== WebSocket.OPEN) return;
+
+            consoleWs.send(JSON.stringify({ event: 'cmd', payload: { containerId, command: cmd } }));
+            input.value = '';
+            addLog('COMMAND', cmd);
+          });
+
+          document.getElementById('cmdInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('sendBtn').click();
+          });
+
+          // Confirmation modal
+          const modal = document.getElementById('confirm-modal');
+          const overlay = document.getElementById('confirm-overlay');
+          const confirmTitle = document.getElementById('confirm-title');
+          const confirmMessage = document.getElementById('confirm-message');
+          const confirmDetails = document.getElementById('confirm-details');
+          const confirmIcon = document.getElementById('confirm-icon');
+          const confirmActionBtn = document.getElementById('confirm-action');
+          const confirmActionIcon = document.getElementById('confirm-action-icon');
+          const cancelBtn = document.getElementById('confirm-cancel');
+          const confirmPanel = document.getElementById('confirm-panel');
+
+          let pendingAction = null;
+
+          function openConfirm(action) {
+            pendingAction = action;
+
+            if (action === 'stop') {
+              confirmTitle.textContent = 'Confirm STOP';
+              confirmMessage.textContent = 'Are you sure you want to STOP the container? Stopping will terminate the running process.';
+              confirmDetails.textContent = 'You can start the container again afterwards if needed.';
+              confirmIcon.setAttribute('data-lucide', 'x-circle');
+              confirmIcon.classList.remove('text-yellow-600');
+              confirmIcon.classList.add('text-red-600');
+              confirmActionBtn.classList.remove('bg-yellow-600', 'hover:bg-yellow-700');
+              confirmActionBtn.classList.add('hover:bg-red-700', 'bg-red-600');
+              confirmActionIcon.setAttribute('data-lucide', 'x');
+            } else if (action === 'restart') {
+              confirmTitle.textContent = 'Confirm RESTART';
+              confirmMessage.textContent = 'Are you sure you want to RESTART the container? The service will briefly go offline.';
+              confirmDetails.textContent = 'This will stop and then start the container automatically.';
+              confirmIcon.setAttribute('data-lucide', 'rotate-cw');
+              confirmIcon.classList.remove('text-red-600');
+              confirmIcon.classList.add('text-yellow-600');
+              confirmActionBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+              confirmActionBtn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
+              confirmActionIcon.setAttribute('data-lucide', 'refresh-cw');
+            } else {
+              confirmTitle.textContent = 'Confirm action';
+              confirmMessage.textContent = 'Are you sure?';
+              confirmIcon.setAttribute('data-lucide', 'alert-triangle');
+              confirmActionIcon.setAttribute('data-lucide', 'check');
+            }
+
+            modal.classList.remove('hidden');
+
+            requestAnimationFrame(() => {
+              confirmPanel.classList.remove('scale-95', 'opacity-0');
+              confirmPanel.classList.add('scale-100', 'opacity-100');
+            });
+
+            if (window.lucide) lucide.createIcons();
+            document.documentElement.style.overflow = 'hidden';
+            confirmActionBtn.focus();
+          }
+
+          function closeConfirm() {
+            confirmPanel.classList.remove('scale-100', 'opacity-100');
+            confirmPanel.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+              modal.classList.add('hidden');
+              document.documentElement.style.overflow = '';
+              pendingAction = null;
+            }, 200);
+          }
+
+          function sendPowerCommand(action) {
+            try {
+              if (typeof consoleWs !== 'undefined' && consoleWs.readyState === WebSocket.OPEN) {
+                consoleWs.send(JSON.stringify({ event: `power:${action}`, payload: { containerId } }));
+              } else {
+                addLog('ERROR', 'WebSocket not connected. Cannot send power command.');
+              }
+            } catch (err) {
+              addLog('ERROR', 'Failed to send power command: ' + (err && err.message ? err.message : err));
+            }
+          }
+
+          document.querySelectorAll('#power-actions button[data-action]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const action = btn.getAttribute('data-action');
+              if (action === 'stop' || action === 'restart') {
+                openConfirm(action);
+                return;
+              }
+
+              if (typeof consoleWs !== 'undefined' && consoleWs.readyState === WebSocket.OPEN) {
+                consoleWs.send(JSON.stringify({ event: `power:${action}`, payload: { containerId } }));
+              } else {
+                addLog('ERROR', 'WebSocket not connected. Cannot send power command.');
+              }
+            });
+          });
+
+          confirmActionBtn.addEventListener('click', () => {
+            if (!pendingAction) {
+              closeConfirm();
+              return;
+            }
+
+            sendPowerCommand(pendingAction);
+            closeConfirm();
+          });
+
+          cancelBtn.addEventListener('click', closeConfirm);
+          overlay.addEventListener('click', closeConfirm);
+
+          window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeConfirm();
+          });
+
+          // --- Charts (Chart.js) ---
+          const cpuChart = new Chart(document.getElementById('cpuChart'), {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: 'CPU Usage (cores)',
+                data: Array(20).fill(0),
+                borderColor: 'rgb(34,197,94)',
+                backgroundColor: 'rgba(34,197,94,0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              animation: false,
+              responsive: true,
+              plugins: {
+                title: {
+                  display: true,
+                  text: 'CPU Usage',
+                  color: '#f9fafb',
+                  font: { size: 16 }
+                }
+              },
+              scales: {
+                y: { beginAtZero: true, max: <%= server.core %> }
+              }
+            }
+          });
+
+          const ramChart = new Chart(document.getElementById('ramChart'), {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: 'RAM MB',
+                data: Array(20).fill(0),
+                borderColor: 'rgb(59,130,246)',
+                backgroundColor: 'rgba(59,130,246,0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              animation: false,
+              responsive: true,
+              plugins: {
+                title: {
+                  display: true,
+                  text: 'Ram Usage',
+                  color: '#f9fafb',
+                  font: { size: 16 }
+                }
+              },
+              scales: {
+                y: { beginAtZero: true, max: <%= server.ram %> }
+              }
+            }
+          });
+
+          function updateStatus(payload) {
+            const stats = payload.stats || payload;
+
+            // CPU usage in cores
+            const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
+            const systemDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
+            const cpuUsageCores = systemDelta > 0 ? (cpuDelta / systemDelta) * stats.cpu_stats.online_cpus : 0;
+
+            // RAM usage in MB
+            const ramMB = stats.memory_stats.usage / 1024 / 1024; // bytes → MB
+
+            // Update charts
+            cpuChart.data.datasets[0].data.push(cpuUsageCores);
+            cpuChart.data.datasets[0].data.shift();
+            cpuChart.update();
+
+            ramChart.data.datasets[0].data.push(ramMB);
+            ramChart.data.datasets[0].data.shift();
+            ramChart.update();
+
+            // Status dot logic
+            const statusDot = document.getElementById('status-dot');
+            const online = ramMB > 0; // fixed variable (ramMB instead of undefined ramGB)
+
+            statusDot.innerHTML = online
+              ? `<span class="relative inline-flex h-3 w-3 items-center justify-center"><span class="absolute h-3 w-3 rounded-full bg-emerald-500 opacity-35"></span><span class="relative h-1.5 w-1.5 rounded-full bg-emerald-500"></span></span>`
+              : `<span class="relative inline-flex h-3 w-3 items-center justify-center"><span class="absolute h-3 w-3 rounded-full bg-gray-400 opacity-35"></span><span class="relative h-1.5 w-1.5 rounded-full bg-gray-400"></span></span>`;
+
+            // Power buttons logic
+            document.querySelectorAll('#power-actions button[data-action]').forEach((btn) => {
+              const action = btn.getAttribute('data-action');
+
+              btn.disabled = false;
+              btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+              if (online && action === 'start') {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+              }
+
+              if (!online && (action === 'stop' || action === 'restart')) {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+              }
+            });
+          }
+
+          if (window.lucide) lucide.createIcons();
+        </script>
       </div>
     </main>
-   <script>
-  const logContainer = document.getElementById("logContainer");
-
-  const logColors = {
-    INFO: "#d4d4d4",
-    WARN: "#f59e0b",
-    ERROR: "#ef4444",
-    SYSTEM: "#10b981",
-    POWER: "#fbbf24",
-    COMMAND: "#3b82f6",
-    DAEMON: "#8b5cf6",
-  };
-
-  function hexToAlpha(hex, alpha) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r},${g},${b},${alpha})`;
-  }
-
-  function stripAnsiCodes(str) {
-    return str.replace(/\x1b\[[0-9;]*m/g, "");
-  }
-
-  function parseServerMessage(msg) {
-    msg = msg.replace(/\x1b\[[0-9;?]*[a-zA-Z]/g, "");
-    msg = msg.replace(/^[\x1b>=\.]+ ?/g, "").trim();
-
-    const timestampRegex = /^\[(\d{2}:\d{2}:\d{2}) (\w+)\]:\s*(.*)$/;
-    const tsMatch = msg.match(timestampRegex);
-    if (tsMatch) return { type: tsMatch[2].toUpperCase(), text: tsMatch[3] };
-
-    const typeRegex = /^(\w+)\s+(.*)$/;
-    const typeMatch = msg.match(typeRegex);
-    if (
-      typeMatch &&
-      ["INFO", "WARN", "ERROR", "SYSTEM", "DAEMON", "COMMAND", "POWER"].includes(
-        typeMatch[1].toUpperCase()
-      )
-    ) {
-      return { type: typeMatch[1].toUpperCase(), text: typeMatch[2] };
-    }
-
-    return { type: "INFO", text: msg };
-  }
-
-  function addLog(type, message) {
-    const logLine = document.createElement("div");
-    logLine.classList.add("flex", "items-center", "gap-2");
-
-    const badge = document.createElement("span");
-    badge.textContent = type;
-    badge.classList.add(
-      "inline-flex",
-      "px-2",
-      "py-0.5",
-      "text-xs",
-      "font-semibold",
-      "uppercase",
-      "rounded"
-    );
-    badge.style.backgroundColor = hexToAlpha(logColors[type] || "#d4d4d4", 0.1);
-    badge.style.color = logColors[type] || "#d4d4d4";
-
-    const text = document.createElement("span");
-    text.textContent = message;
-
-    logLine.appendChild(badge);
-    logLine.appendChild(text);
-    logContainer.appendChild(logLine);
-
-    logContainer.scrollTop = logContainer.scrollHeight;
-  }
-
-  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-  const serverId = "<%= server.id %>";
-  const containerId = "<%= server.containerId %>";
-
-  // Console WebSocket
-  const consoleWs = new WebSocket(`${protocol}://${window.location.hostname}${window.location.port ? ":" + window.location.port : ""}/console/${serverId}`);
-  consoleWs.onopen = () => addLog("DAEMON", "Connected to server console");
-  consoleWs.onmessage = (evt) => {
-    try {
-      const data = JSON.parse(evt.data);
-      if (data.event === "cmd" || data.event === "error") {
-        const parsed = parseServerMessage(data.payload);
-        addLog(parsed.type, parsed.text);
-      } else if (data.event.startsWith("power")) {
-        addLog("POWER", data.payload);
-      }
-    } catch {
-      const parsed = parseServerMessage(evt.data);
-      addLog(parsed.type, parsed.text);
-    }
-  };
-  consoleWs.onclose = () => addLog("DAEMON", "Disconnected from server");
-  consoleWs.onerror = () => addLog("ERROR", "WebSocket error");
-
-  // Stats WebSocket
-  const statsWs = new WebSocket(`${protocol}://${window.location.hostname}${window.location.port ? ":" + window.location.port : ""}/stats/${serverId}`);
-  statsWs.onopen = () => //addLog("DAEMON", "Connected to stats feed");
-  statsWs.onmessage = (evt) => {
-    try {
-      const stats = JSON.parse(evt.data);
-      updateStatus(stats);
-    } catch (err) {
-      console.error("Invalid stats data:", evt.data);
-    }
-  };
-  statsWs.onclose = () => addLog("DAEMON", "Stats WebSocket closed");
-  statsWs.onerror = () => addLog("ERROR", "Stats WebSocket error");
-
-  // Send command
-  document.getElementById("sendBtn").addEventListener("click", () => {
-    const input = document.getElementById("cmdInput");
-    const cmd = input.value.trim();
-    if (!cmd || consoleWs.readyState !== WebSocket.OPEN) return;
-
-    consoleWs.send(JSON.stringify({ event: "cmd", payload: { containerId, command: cmd } }));
-    input.value = "";
-    addLog("COMMAND", cmd);
-  });
-  document.getElementById("cmdInput").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") document.getElementById("sendBtn").click();
-  });
-
-  // Power buttons
-  document.querySelectorAll("#power-actions button[data-action]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const action = btn.getAttribute("data-action");
-      if (consoleWs.readyState === WebSocket.OPEN) {
-        consoleWs.send(JSON.stringify({ event: `power:${action}`, payload: { containerId } }));
-      } else {
-        addLog("ERROR", "WebSocket not connected. Cannot send power command.");
-      }
-    });
-  });
-function updateStatus(payload) {
-    const statusElement = document.getElementById("status");
-
-    // Access the real stats object
-    const stats = payload.stats || payload; // handle both payload.stats or direct stats
-
-    const ramUsageRaw = (stats.memory_stats?.usage || 0) / 1024 / 1024;
-    const ramLimitRaw = (stats.memory_stats?.limit || 1) / 1024 / 1024;
-    const ramPercent = ((ramUsageRaw / ramLimitRaw) * 100).toFixed(1);
-
-    const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
-    const systemCpuDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
-    let cpuPercent = ((cpuDelta / systemCpuDelta) * 100).toFixed(1);
-    if (isNaN(cpuPercent)) cpuPercent = 0;
-
-    const online = ramUsageRaw > 1; // online if using RAM > 1MB
-    statusElement.innerHTML = online
-        ? `<i data-lucide="server" class="w-5 h-5 text-emerald-500 mr-1"></i> Online`
-        : `<i data-lucide="server-off" class="w-5 h-5 text-red-500 mr-1"></i> Offline`;
-
-    statusElement.className = `flex items-center gap-2 mt-1 text-lg font-medium tracking-tight ${
-        online ? "text-emerald-500" : "text-red-500"
-    }`;
-
-    // Re-activate Lucide icons
-    if (window.lucide) lucide.createIcons();
-}
-
-
-</script>
-
   </body>
 </html>

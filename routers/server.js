@@ -25,6 +25,13 @@ function getNodeUrl(node) {
   return `http://${node.ip}:${node.port}`;
 }
 
+function withServer(req, res, next) {
+  const server = getServerForUser(req.session.userId, req.params.id);
+  if (!server) return res.redirect("/dashboard?error=NOTFOUND");
+  if (server.suspended) return res.redirect("/dashboard?error=SUSPENDED");
+  next();
+}
+
 /* =========================
    PANEL FILE ROUTES
 ========================= */
@@ -33,12 +40,11 @@ function getNodeUrl(node) {
  * GET /server/manage/:id
  * Render server management page for a single server
  */
-router.get("/server/manage/:id", requireAuth, (req, res) => {
+router.get("/server/manage/:id", requireAuth, withServer, (req, res) => {
   const user = unsqh.get("users", req.session.userId);
   if (!user) return res.redirect("/");
 
-  const server = user.servers?.find((s) => s.id === req.params.id);
-  if (!server) return res.redirect("/dashboard"); // fallback if server not found
+  const server = getServerForUser(req.session.userId, req.params.id);
 
   const settings = unsqh.get("settings", "app") || {};
   const appName = settings.name || "App";
@@ -55,7 +61,7 @@ router.get("/server/manage/:id", requireAuth, (req, res) => {
  * List files and folders for a server
  * Query: ?path=/
  */
-router.get("/server/files/:id", requireAuth, async (req, res) => {
+router.get("/server/files/:id", requireAuth, withServer, async (req, res) => {
   const server = getServerForUser(req.session.userId, req.params.id);
   if (!server) return res.status(404).send("Server not found");
 
@@ -100,7 +106,7 @@ router.get("/server/files/:id", requireAuth, async (req, res) => {
  * GET /server/files/:id/content
  * Query: ?location=/file.txt
  */
-router.get("/server/files/:id/content", requireAuth, async (req, res) => {
+router.get("/server/files/:id/content", requireAuth, withServer, async (req, res) => {
   const server = getServerForUser(req.session.userId, req.params.id);
   if (!server) return res.status(404).send("Server not found");
   if (!server.node) return res.status(500).send("Server node not assigned");
@@ -139,7 +145,7 @@ router.get("/server/files/:id/content", requireAuth, async (req, res) => {
  * body: { filename, content }
  * Query: ?path=/
  */
-router.post("/server/files/:id/new-file", requireAuth, async (req, res) => {
+router.post("/server/files/:id/new-file", requireAuth, withServer, async (req, res) => {
   const server = getServerForUser(req.session.userId, req.params.id);
   if (!server) return res.status(404).send("Server not found");
   if (!server.node) return res.status(500).send("Server node not assigned");
@@ -171,7 +177,7 @@ router.post("/server/files/:id/new-file", requireAuth, async (req, res) => {
  * body: { filename }
  * Query: ?path=/
  */
-router.post("/server/files/:id/new-folder", requireAuth, async (req, res) => {
+router.post("/server/files/:id/new-folder", requireAuth, withServer, async (req, res) => {
   const server = getServerForUser(req.session.userId, req.params.id);
   if (!server) return res.status(404).send("Server not found");
   if (!server.node) return res.status(500).send("Server node not assigned");
@@ -202,7 +208,7 @@ router.post("/server/files/:id/new-folder", requireAuth, async (req, res) => {
  * POST /server/files/:id/file/delete
  * Query: ?location=/file.txt
  */
-router.post("/server/files/:id/file/delete", requireAuth, async (req, res) => {
+router.post("/server/files/:id/file/delete", requireAuth, withServer, async (req, res) => {
   const server = getServerForUser(req.session.userId, req.params.id);
   if (!server) return res.status(404).send("Server not found");
   if (!server.node) return res.status(500).send("Server node not assigned");
@@ -232,7 +238,7 @@ router.post("/server/files/:id/file/delete", requireAuth, async (req, res) => {
  */
 router.post(
   "/server/files/:id/folder/delete",
-  requireAuth,
+  requireAuth, withServer,
   async (req, res) => {
     const server = getServerForUser(req.session.userId, req.params.id);
     if (!server) return res.status(404).send("Server not found");
@@ -262,7 +268,7 @@ router.post(
  * POST /server/files/:id/file/rename
  * body: { location, newName }
  */
-router.post("/server/files/:id/file/rename", requireAuth, async (req, res) => {
+router.post("/server/files/:id/file/rename", requireAuth, withServer, async (req, res) => {
   const server = getServerForUser(req.session.userId, req.params.id);
   if (!server) return res.status(404).send("Server not found");
   if (!server.node) return res.status(500).send("Server node not assigned");
@@ -292,7 +298,7 @@ router.post("/server/files/:id/file/rename", requireAuth, async (req, res) => {
  */
 router.post(
   "/server/files/:id/folder/rename",
-  requireAuth,
+  requireAuth, withServer,
   async (req, res) => {
     const server = getServerForUser(req.session.userId, req.params.id);
     if (!server) return res.status(404).send("Server not found");
@@ -325,7 +331,7 @@ router.post(
  * GET /server/settings/:id
  * Render server settings page
  */
-router.get("/server/settings/:id", requireAuth, (req, res) => {
+router.get("/server/settings/:id", requireAuth, withServer, (req, res) => {
   const user = unsqh.get("users", req.session.userId);
   if (!user) return res.redirect("/");
 
@@ -351,7 +357,7 @@ router.get("/server/settings/:id", requireAuth, (req, res) => {
  * Rename the server
  * body: { newName }
  */
-router.post("/server/settings/:id/rename", requireAuth, (req, res) => {
+router.post("/server/settings/:id/rename", requireAuth, withServer, (req, res) => {
   const { newName } = req.body;
   if (!newName) return res.status(400).send("Missing newName");
 
@@ -379,7 +385,7 @@ router.post("/server/settings/:id/rename", requireAuth, (req, res) => {
  */
 router.post(
   "/server/settings/reinstall/:idt",
-  requireAuth,
+  requireAuth, withServer,
   async (req, res) => {
     const { idt } = req.params;
 
@@ -428,7 +434,7 @@ router.post(
  */
 router.post(
   "/server/files/:id/upload",
-  requireAuth,
+  requireAuth, withServer,
   upload.single("file"),
   async (req, res) => {
     const server = getServerForUser(req.session.userId, req.params.id);

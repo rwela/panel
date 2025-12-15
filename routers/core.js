@@ -420,6 +420,7 @@ router.post("/admin/servers/new", requireAuth, requireAdmin, async (req, res) =>
       containerId,
       idt,
       env: finalEnv,
+      suspended: false,
       createdAt: Date.now()
     };
 
@@ -434,6 +435,58 @@ router.post("/admin/servers/new", requireAuth, requireAdmin, async (req, res) =>
     console.error("Failed to deploy server:", err);
     res.status(500).json({ error: "Failed to deploy server" });
   }
+});
+
+/**
+ * POST /admin/servers/suspend/:id
+ * Suspend the server thats it ;3
+ */
+router.post("/admin/servers/suspend/:id", requireAuth, requireAdmin, async (req, res) => {
+  const server = unsqh.get("servers", req.params.id);
+  if (!server) return res.status(404).json({ error: "Server not found" });
+
+  if (server.node && server.node.ip && server.node.key && server.containerId) {
+    try {
+      await axios.post(
+        `http://${server.node.ip}:${server.node.port}/server/action/${server.containerId}?action=stop&key=${server.node.key}`
+      );
+    } catch (nodeErr) {
+      console.warn("Failed to stop server on node, ignoring:", nodeErr.message);
+    }
+  }
+
+  server.suspended = true;
+  unsqh.update("servers", server.id, { suspended: true });
+
+  const user = unsqh.get("users", server.userId);
+  if (user && user.servers) {
+    const userServer = user.servers.find(s => s.id === server.id);
+    if (userServer) userServer.suspended = true;
+    unsqh.update("users", user.id, { servers: user.servers });
+  }
+
+  res.json({ success: true, suspended: true });
+});
+
+
+/**
+ * POST /admin/servers/unsuspend/:id
+ */
+router.post("/admin/servers/unsuspend/:id", requireAuth, requireAdmin, (req, res) => {
+  const server = unsqh.get("servers", req.params.id);
+  if (!server) return res.status(404).json({ error: "Server not found" });
+
+  server.suspended = false;
+  unsqh.update("servers", server.id, { suspended: false });
+
+  const user = unsqh.get("users", server.userId);
+  if (user && user.servers) {
+    const userServer = user.servers.find(s => s.id === server.id);
+    if (userServer) userServer.suspended = false;
+    unsqh.update("users", user.id, { servers: user.servers });
+  }
+
+  res.json({ success: true, suspended: false });
 });
 
 /**
@@ -470,5 +523,37 @@ router.post("/admin/servers/delete/:id", requireAuth, requireAdmin, async (req, 
   }
 });
 
+/**
+ * GET /admin/settings
+ * Render admin settings page
+ */
+router.get("/admin/settings", requireAuth, requireAdmin, (req, res) => {
+  const settings = unsqh.get("settings", "app") || {};
+  const appName = settings.name || "App";
+  const user = unsqh.get("users", req.session.userId);
+
+  res.render("admin/settings", {
+    name: appName,
+    user,
+    settings
+  });
+});
+
+/**
+ * POST /admin/settings
+ * Update settings (e.g., app name)
+ */
+router.post("/admin/settings", requireAuth, requireAdmin, (req, res) => {
+  const { name } = req.body;
+
+  if (!name || name.trim() === "") {
+    return res.status(400).json({ error: "App name is required" });
+  }
+
+  const updatedSettings = { name: name.trim() };
+  unsqh.put("settings", "app", updatedSettings);
+
+  res.json({ success: true, settings: updatedSettings });
+});
 
 module.exports = router;

@@ -89,6 +89,7 @@
           <div class="flex justify-end">
             <button
               onclick="createServer()"
+              id="createBtn"
               class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl"
             >
               Create
@@ -141,6 +142,11 @@
       }
 
       async function createServer() {
+        const btn = document.getElementById("createBtn");
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = "Creating…";
+
         try {
           const res = await axios.post("/admin/servers/new", {
             userId: document.getElementById("user").value,
@@ -153,10 +159,16 @@
             env: collectEnv(),
           });
 
-          if (res.data.success) window.location.href = "/admin/servers";
+          if (res.data.success) {
+            window.location.href = "/admin/servers";
+          } else {
+            throw new Error("Server creation failed");
+          }
         } catch (err) {
           alert("Failed to create server");
           console.error(err);
+          btn.disabled = false;
+          btn.textContent = originalText;
         }
       }
 

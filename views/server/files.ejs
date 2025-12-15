@@ -18,19 +18,23 @@
 
     <main class="flex-1 p-8 overflow-auto">
       <div class="max-w-6xl mx-auto space-y-6">
-        <!-- Server Header -->
         <div
-          class="bg-neutral-950 border border-neutral-900 p-6 rounded-3xl shadow-xl flex justify-between items-center"
+          class="bg-neutral-950 border border-neutral-900 rounded-2xl px-6 py-4 flex items-center justify-between"
         >
-          <div>
-            <h1 class="text-3xl font-bold flex items-center gap-2">
-              <i data-lucide="server" class="text-neutral-100"></i> <%=
-              server.name %> Files
-            </h1>
-            <p class="text-neutral-400 mt-1">
-              Node: <%= server.node?.name || 'Unknown' %> | IP: <%=
-              server.node?.ip || '0.0.0.0' %>:<%= server.port %>
-            </p>
+          <!-- LEFT INFO -->
+          <div class="flex items-start gap-3">
+            <!-- Status dot -->
+            <span id="status-dot" class="mt-2"></span>
+            <div class="leading-tight">
+              <p class="text-lg font-semibold text-gray-100">
+                <%= server.name %>
+              </p>
+              <p class="text-sm text-gray-400">
+                <%= server.node?.ip || '0.0.0.0' %>:<%= server.port %>
+                <span class="mx-1"></span>
+                <%= server.node?.name || 'unknown' %>
+              </p>
+            </div>
           </div>
         </div>
 
@@ -72,7 +76,7 @@
             >
               <tr>
                 <th class="px-4 py-2">Name</th>
-                <th class="px-4 py-2">Type</th>
+                <th class="px-4 py-2">Size</th>
                 <th class="px-4 py-2">Created</th>
                 <th class="px-4 py-2">Actions</th>
               </tr>
@@ -90,7 +94,7 @@
                     href="?path=<%= encodeURIComponent(path + '/' + file.name) %>"
                     class="text-neutral-100 hover:text-neutral-300 hover:underline flex items-center gap-2 font-medium"
                   >
-                    <i data-lucide="folder"></i> <%= file.name %>
+                    <i data-lucide="folder-closed"></i> <%= file.name %>
                   </a>
                   <% } else { %> <% const ext = file.name.includes('.') ?
                   file.name.split('.').pop().toLowerCase() : ''; const
@@ -106,7 +110,11 @@
                   </span>
                   <% } %>
                 </td>
-                <td class="px-4 py-2 capitalize"><%= file.type %></td>
+                <td class="px-4 py-2 capitalize">
+                  <%= (()=>{let b=file.size;if(b==null)return'';let
+                  s=['B','KB','MB','GB','TB'],i=0;while(b>=1024&&i<s.length-1)b/=1024,i++;return
+                  b.toFixed(2)+' '+s[i];})() %>
+                </td>
                 <td class="px-4 py-2">
                   <%= new Date(file.createdAt).toLocaleString() %>
                 </td>
@@ -155,58 +163,84 @@
         </div>
       </div>
     </main>
-
-    <!-- Modal -->
+    <!-- Rename/Create Modal -->
     <div
       id="modalOverlay"
       class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
     >
-      <div class="bg-neutral-900 p-6 rounded-3xl w-96 space-y-4 shadow-lg">
-        <h2 class="text-xl font-bold" id="modalTitle"></h2>
-        <input
-          id="modalInput"
-          class="w-full p-3 rounded-2xl bg-neutral-800 border border-neutral-700 text-neutral-100"
-          placeholder="Name"
-        />
-        <textarea
-          id="modalContent"
-          class="w-full p-3 rounded-2xl bg-neutral-800 border border-neutral-700 hidden h-32 text-neutral-100"
-          placeholder="Content (for file)"
-        ></textarea>
-        <div class="flex justify-end gap-3">
-          <button
-            id="modalCancel"
-            class="px-5 py-2 bg-neutral-700 hover:bg-neutral-600 rounded-2xl shadow hover:shadow-md transition"
-          >
-            Cancel
-          </button>
-          <button
-            id="modalConfirm"
-            class="px-5 py-2 bg-neutral-700 hover:bg-neutral-600 rounded-2xl shadow hover:shadow-md transition"
-          >
-            Create
-          </button>
+      <div
+        id="modalPanel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+        class="relative z-10 max-w-lg w-full mx-4 rounded-2xl bg-neutral-900 text-neutral-100 shadow-xl ring-1 ring-black/10 overflow-hidden transform transition-all duration-200 ease-out scale-95 opacity-0"
+      >
+        <div class="p-6">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 mt-1">
+              <i data-lucide="edit-2" class="w-8 h-8 text-blue-500"></i>
+            </div>
+
+            <div class="flex-1">
+              <h2 id="modalTitle" class="text-lg font-semibold">New File</h2>
+              <p class="mt-1 text-sm text-neutral-400">
+                Enter a name for your file or folder. For files, you can also
+                add content.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-col gap-3">
+            <input
+              id="modalInput"
+              class="w-full p-3 rounded-2xl bg-neutral-800 border border-neutral-700 text-neutral-100"
+              placeholder="Name"
+            />
+            <textarea
+              id="modalContent"
+              class="w-full p-3 rounded-2xl bg-neutral-800 border border-neutral-700 hidden h-32 text-neutral-100"
+              placeholder="Content (for file)"
+            ></textarea>
+          </div>
+
+          <div class="mt-6 flex justify-end gap-3">
+            <button
+              id="modalCancel"
+              class="px-4 py-2 rounded-lg text-sm bg-neutral-100 hover:bg-neutral-200 text-neutral-950"
+            >
+              Cancel
+            </button>
+            <button
+              id="modalConfirm"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-red-600 hover:bg-red-700 text-white"
+            >
+              <i data-lucide="check" class="w-4 h-4"></i>
+              Confirm
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Upload Modal -->
     <div
       id="uploadModal"
-      class="fixed inset-0 bg-white bg-opacity-95 hidden flex flex-col items-center justify-center z-50 p-6"
+      class="fixed inset-0 bg-black bg-opacity-50 hidden flex flex-col items-center justify-center z-50 p-6"
     >
-      <h2 class="text-2xl font-bold mb-4">Uploading Files...</h2>
+      <h2 class="text-2xl font-bold mb-4 text-white">Uploading Files...</h2>
       <div
-        id="uploadProgress"
-        class="w-full max-w-lg bg-neutral-200 rounded-xl overflow-hidden h-6 mb-2"
+        class="w-full max-w-lg bg-neutral-800 rounded-xl overflow-hidden h-6 mb-2"
       >
         <div id="uploadBar" class="bg-green-500 h-6 w-0"></div>
       </div>
-      <p id="uploadStatus" class="text-neutral-800 font-medium"></p>
+      <p id="uploadStatus" class="text-white font-medium"></p>
     </div>
 
     <script>
       lucide.createIcons();
 
       const modalOverlay = document.getElementById("modalOverlay");
+      const modalPanel = document.getElementById("modalPanel");
       const modalTitle = document.getElementById("modalTitle");
       const modalInput = document.getElementById("modalInput");
       const modalContent = document.getElementById("modalContent");
@@ -215,36 +249,43 @@
 
       let modalMode = null;
       let modalTarget = null;
+      function showModal() {
+        modalOverlay.classList.remove("hidden");
+        requestAnimationFrame(() => {
+          modalPanel.classList.remove("scale-95", "opacity-0");
+          modalPanel.classList.add("scale-100", "opacity-100");
+        });
+      }
 
+      function hideModal() {
+        modalPanel.classList.remove("scale-100", "opacity-100");
+        modalPanel.classList.add("scale-95", "opacity-0");
+        setTimeout(() => modalOverlay.classList.add("hidden"), 200);
+      }
       function openModal(type) {
         modalMode = type;
         modalTarget = null;
-        modalOverlay.classList.remove("hidden");
         modalTitle.textContent = type === "file" ? "New File" : "New Folder";
         modalInput.value = "";
         modalContent.value = "";
         modalContent.classList.toggle("hidden", type !== "file");
         modalConfirm.dataset.type = type;
+        showModal();
       }
-
       function openRenameModal(type, name, relPath) {
         modalMode = "rename";
         modalTarget = { type, name, path: relPath };
-        modalOverlay.classList.remove("hidden");
         modalTitle.textContent = `Rename ${type}`;
         modalInput.value = name;
         modalContent.classList.add("hidden");
         modalConfirm.dataset.type = type;
+        showModal();
       }
 
-      function closeModal() {
-        modalOverlay.classList.add("hidden");
-      }
-
+      modalCancel.onclick = hideModal;
       document.getElementById("newFileBtn").onclick = () => openModal("file");
       document.getElementById("newFolderBtn").onclick = () =>
         openModal("folder");
-      modalCancel.onclick = closeModal;
 
       modalConfirm.onclick = () => {
         if (!modalInput.value.trim()) return alert("Name required");
@@ -252,8 +293,10 @@
           const form = document.createElement("form");
           form.method = "POST";
           form.action = `/server/files/<%= server.id %>/${modalTarget.type}/rename`;
-          form.innerHTML = `<input type="hidden" name="location" value="${modalTarget.path}">
-                            <input type="hidden" name="newName" value="${modalInput.value}">`;
+          form.innerHTML = `
+        <input type="hidden" name="location" value="${modalTarget.path}">
+        <input type="hidden" name="newName" value="${modalInput.value}">
+      `;
           document.body.appendChild(form);
           form.submit();
         } else {
@@ -263,20 +306,18 @@
           form.action = `/server/files/<%= server.id %>/${
             type === "file" ? "new-file" : "new-folder"
           }?path=<%= encodeURIComponent(path) %>`;
-          form.innerHTML = `<input type="hidden" name="filename" value="${
-            modalInput.value
-          }">
-                            ${
-                              type === "file"
-                                ? `<input type="hidden" name="content" value="${modalContent.value}">`
-                                : ""
-                            }`;
+          form.innerHTML = `
+        <input type="hidden" name="filename" value="${modalInput.value}">
+        ${
+          type === "file"
+            ? `<input type="hidden" name="content" value="${modalContent.value}">`
+            : ""
+        }
+      `;
           document.body.appendChild(form);
           form.submit();
         }
       };
-
-      // Dropdown menu logic
       document.querySelectorAll(".dropdownBtn").forEach((btn) => {
         const menu = btn.nextElementSibling;
         btn.onclick = (e) => {
@@ -293,16 +334,12 @@
           .querySelectorAll(".dropdownMenu")
           .forEach((menu) => menu.classList.add("hidden"));
       });
-
-      // Rename buttons inside dropdown
       document.querySelectorAll(".renameBtn").forEach((btn) => {
         btn.onclick = () => {
           openRenameModal(btn.dataset.type, btn.dataset.name, btn.dataset.path);
           btn.closest(".dropdownMenu").classList.add("hidden");
         };
       });
-
-      // Poll files every 3s
       let lastSnapshot = null;
       async function pollFiles() {
         try {
@@ -318,7 +355,7 @@
           console.error(e);
         }
       }
-      setInterval(pollFiles, 3000);
+      //  setInterval(pollFiles, 3000);
       const uploadBtn = document.getElementById("uploadFileBtn");
       const uploadInput = document.getElementById("uploadFileInput");
       const uploadModal = document.getElementById("uploadModal");
@@ -327,65 +364,27 @@
 
       let uploadQueue = [];
 
-      // Open file picker
       uploadBtn.onclick = () => uploadInput.click();
-
-      // Handle file selection
       uploadInput.onchange = (e) => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
         enqueueFiles(files);
       };
 
-      // Drag and Drop support
-      const tableContainer = document.querySelector(
-        ".bg-neutral-900.border.border-neutral-800"
-      );
-      tableContainer.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        tableContainer.classList.add("bg-neutral-800/40");
-      });
-      tableContainer.addEventListener("dragleave", (e) => {
-        e.preventDefault();
-        tableContainer.classList.remove("bg-neutral-800/40");
-      });
-      tableContainer.addEventListener("drop", (e) => {
-        e.preventDefault();
-        tableContainer.classList.remove("bg-neutral-800/40");
-        const files = Array.from(e.dataTransfer.files).filter(
-          (f) => f.type || f.size
-        );
-        if (files.length) enqueueFiles(files);
-      });
-
       function enqueueFiles(files) {
         uploadQueue.push(...files);
         if (uploadQueue.length === files.length) startUploadQueue();
       }
 
-      // Upload files one by one using fetch
       async function startUploadQueue() {
-        if (!uploadQueue.length) return hideUploadModal();
+        if (!uploadQueue.length) return location.reload();
         showUploadModal();
+
         const file = uploadQueue.shift();
         uploadStatus.textContent = `Uploading ${file.name}...`;
 
-        const formData = new FormData();
-        formData.append("file", file);
-
         try {
-          // Create a fetch request
-          const response = await fetch(
-            `/server/files/<%= server.id %>/upload?path=<%= encodeURIComponent(path) %>`,
-            {
-              method: "POST",
-              body: formData,
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`Server responded with status ${response.status}`);
-          }
+          await uploadFile(file);
         } catch (err) {
           console.error(err);
           alert(`Failed to upload ${file.name}: ${err.message}`);
@@ -395,9 +394,39 @@
         startUploadQueue();
       }
 
+      function uploadFile(file) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          const formData = new FormData();
+          formData.append("file", file);
+
+          xhr.upload.addEventListener("progress", (e) => {
+            if (e.lengthComputable) {
+              const percent = (e.loaded / e.total) * 100;
+              uploadBar.style.width = percent + "%";
+            }
+          });
+
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) resolve();
+            else
+              reject(new Error(`Server responded with status ${xhr.status}`));
+          };
+
+          xhr.onerror = () => reject(new Error("Upload failed"));
+
+          xhr.open(
+            "POST",
+            `/server/files/<%= server.id %>/upload?path=<%= encodeURIComponent(path) %>`
+          );
+          xhr.send(formData);
+        });
+      }
+
       function showUploadModal() {
         uploadModal.classList.remove("hidden");
       }
+
       function hideUploadModal() {
         uploadModal.classList.add("hidden");
         uploadStatus.textContent = "";

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= name %> - Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      .input {
+        width: 100%;
+        background: #0a0a0a;
+        border: 1px solid #262626;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.75rem;
+        color: #f5f5f5;
+      }
+      .btn {
+        @apply px-4 py-2 rounded-xl font-medium;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex">
+    <%- include('../components/sidebar', { name, user }) %>
+
+    <main class="flex-1 p-8 overflow-auto">
+      <div class="max-w-4xl mx-auto space-y-6">
+        <div
+          class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl flex justify-between items-center"
+        >
+          <div>
+            <h1 class="text-3xl font-bold">⚙️ Settings</h1>
+            <p class="text-gray-400">Update application settings</p>
+          </div>
+        </div>
+
+        <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6">
+          <form id="settingsForm" class="space-y-4">
+            <div>
+              <label for="name" class="block text-gray-400 mb-1"
+                >Application Name</label
+              >
+              <input
+                id="name"
+                name="name"
+                value="<%= settings.name || '' %>"
+                class="input"
+              />
+            </div>
+            <button
+              type="submit"
+              class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl font-medium text-white"
+            >
+              Save
+            </button>
+          </form>
+
+          <div id="msg" class="mt-4"></div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      lucide.createIcons();
+
+      const form = document.getElementById("settingsForm");
+      const msg = document.getElementById("msg");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = form.name.value.trim();
+
+        if (!name) {
+          msg.textContent = "App name cannot be empty";
+          msg.className = "text-red-500 mt-2";
+          return;
+        }
+
+        try {
+          const res = await fetch("/admin/settings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            msg.textContent = "Settings saved successfully!";
+            msg.className = "text-emerald-500 mt-2";
+          } else {
+            msg.textContent = data.error || "Error saving settings";
+            msg.className = "text-red-500 mt-2";
+          }
+        } catch (err) {
+          msg.textContent = err.message;
+          msg.className = "text-red-500 mt-2";
+        }
+      });
+    </script>
+  </body>
+</html>
