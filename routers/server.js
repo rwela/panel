@@ -380,52 +380,82 @@ router.post("/server/settings/:id/rename", requireAuth, withServer, (req, res) =
 });
 
 /**
+ * POST /server/settings/:id/envs
+ * Save envs 
+ */
+router.post(
+  "/server/settings/:id/envs",
+  requireAuth,
+  withServer,
+  (req, res) => {
+    const user = unsqh.get("users", req.session.userId);
+    const server = getServerForUser(req.session.userId, req.params.id);
+
+    if (!server) {
+      return res.status(404).send("Server not found");
+    }
+
+    const newEnv = req.body.env || {};
+
+    // update user server
+    server.env = newEnv;
+    user.servers = user.servers.map(s =>
+      s.id === server.id ? server : s
+    );
+    unsqh.put("users", user.id, user);
+
+    const adminServer = unsqh.get("servers", server.id);
+    if (adminServer) {
+      adminServer.env = newEnv;
+      unsqh.put("servers", server.id, adminServer);
+    }
+
+    res.redirect(`/server/settings/${server.id}?env=saved`);
+  }
+);
+
+/**
  * POST /server/settings/reinstall/:idt
  * Reinstall the server
  */
-router.post(
-  "/server/settings/reinstall/:idt",
-  requireAuth, withServer,
-  async (req, res) => {
-    const { idt } = req.params;
+router.post("/server/settings/reinstall/:id", requireAuth, withServer, async (req, res) => {
+  const { id } = req.params;
 
-    const user = unsqh.get("users", req.session.userId);
-    if (!user) return res.status(404).send("User not found");
+  const user = unsqh.get("users", req.session.userId);
+  if (!user) return res.status(404).send("User not found");
 
-    const server = user.servers?.find((s) => s.idt === idt);
-    if (!server) return res.status(404).send("Server not found");
-    if (!server.node) return res.status(500).send("Server node not assigned");
+  const server = getServerForUser(req.session.userId, id);
+  if (!server) return res.status(404).send("Server not found");
+  if (!server.node) return res.status(500).send("Server node not assigned");
 
-    const node = unsqh.list("nodes").find((n) => n.ip === server.node.ip);
-    if (!node) return res.status(404).send("Node not found");
+  const node = unsqh.list("nodes").find((n) => n.ip === server.node.ip);
+  if (!node) return res.status(404).send("Node not found");
 
-    try {
-      // Trigger reinstall on the node
-      const response = await axios.post(
-        `${getNodeUrl(node)}/server/reinstall/${idt}`,
-        {},
-        { params: { key: node.key } }
-      );
-      const { containerId: newContainerId } = response.data;
+  try {
+    const response = await axios.post(
+      `${getNodeUrl(node)}/server/reinstall/${server.idt}`,
+      { env: server.env },
+      { params: { key: node.key } }
+    );
 
-      // Update in user's servers
-      server.containerId = newContainerId;
-      user.servers = user.servers.map((s) => (s.idt === idt ? server : s));
-      unsqh.put("users", user.id, user);
+    const { containerId: newContainerId } = response.data;
 
-      // Update in admin servers table
-      const adminServer = unsqh.list("servers").find((s) => s.idt === idt);
-      if (adminServer) {
-        adminServer.containerId = newContainerId;
-        unsqh.put("servers", adminServer.id, adminServer);
-      }
-      res.redirect(`/server/settings/${server.id}?rs=true`);
-    } catch (err) {
-      res.redirect(`/server/settings/${server.id}?rs=false`);
-      res.status(500).send(err.message);
+    server.containerId = newContainerId;
+    user.servers = user.servers.map((s) => (s.id === id ? server : s));
+    unsqh.put("users", user.id, user);
+
+    const adminServer = unsqh.list("servers").find((s) => s.idt === server.idt);
+    if (adminServer) {
+      adminServer.containerId = newContainerId;
+      unsqh.put("servers", adminServer.id, adminServer);
     }
+
+    res.redirect(`/server/settings/${server.id}?rs=true`);
+  } catch (err) {
+    console.error("Reinstall failed:", err);
+    res.redirect(`/server/settings/${server.id}?rs=false&err=${encodeURIComponent(err.message || 'unknown')}`);
   }
-);
+});
 
 /**
  * POST /server/files/:id/upload

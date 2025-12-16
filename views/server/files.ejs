@@ -111,9 +111,7 @@
                   <% } %>
                 </td>
                 <td class="px-4 py-2 capitalize">
-                  <%= (()=>{let b=file.size;if(b==null)return'';let
-                  s=['B','KB','MB','GB','TB'],i=0;while(b>=1024&&i<s.length-1)b/=1024,i++;return
-                  b.toFixed(2)+' '+s[i];})() %>
+                  <%= (()=>{let b=file.size;if(b==null)return'';let s=['B','KB','MB','GB','TB'],i=0;while(b>=1024&&i<s.length-1)b/=1024,i++;return b.toFixed(2)+' '+s[i];})() %>
                 </td>
                 <td class="px-4 py-2">
                   <%= new Date(file.createdAt).toLocaleString() %>

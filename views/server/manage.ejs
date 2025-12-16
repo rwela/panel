@@ -26,11 +26,20 @@
   </head>
 
   <body class="min-h-screen flex">
+
     <!-- Sidebar -->
     <%- include('../components/sidebar', { name: name, user: user }) %>
 
     <main class="flex-1 p-8 overflow-auto">
+
       <div class="max-w-6xl mx-auto space-y-6">
+      <div id="loading-overlay"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/90 transition-opacity duration-500">
+        <svg class="animate-spin h-12 w-12 text-gray-100" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+      </div>
         <!-- Header card -->
         <div class="bg-neutral-950 border border-neutral-900 rounded-2xl px-6 py-4 flex items-center justify-between">
           <!-- LEFT INFO -->
@@ -128,6 +137,19 @@
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
+            let itsopendawg = false;
+
+            function checkLoadingComplete() {
+              if (itsopendawg) {
+                // no need for stats ws since if console online = stats online aswell
+                const overlay = document.getElementById('loading-overlay');
+                overlay.style.opacity = '0';
+
+                setTimeout(() => {
+                  overlay.classList.add('hidden');
+                }, 500);
+              }
+            }
           // --- DOM refs ---
           const logContainer = document.getElementById('logContainer');
 
@@ -266,15 +288,21 @@
 
             consoleWs.onerror = () => addLog('ERROR', 'WebSocket error');
           }
-
-          ccws();
-
+          let ift = false;
+             setInterval(() => {
+                if (itsopendawg && ift === false) {
+                  ccws();
+                  ift = true;
+            } else { }
+          }, 200);
           let statsWs;
           function csws() {
             statsWs = new WebSocket(`${protocol}://${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/stats/${serverId}`);
 
             statsWs.onmessage = (evt) => {
               nodeoff(false);
+              itsopendawg = true;
+              checkLoadingComplete();
               try {
                 const stats = JSON.parse(evt.data);
                 updateStatus(stats);
