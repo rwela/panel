@@ -43,16 +43,16 @@
               </tr>
             </thead>
             <tbody>
-              <% servers.forEach(server => { const node = nodes.find(n => n.id
-              === server.nodeId); const image = images.find(i => i.id ===
-              server.imageId); const owner = users.find(u => u.id ===
-              server.userId); %>
+              <% servers.forEach(server => { 
+                   const image = images.find(i => i.id === server.imageId); 
+                   const owner = users.find(u => u.id === server.userId); 
+              %>
               <tr
                 class="border-b border-neutral-800 hover:bg-neutral-800/50 transition"
               >
                 <td class="p-4 font-medium"><%= server.name %></td>
                 <td class="p-4 text-gray-400">
-                  <%= node ? node.name : "Unknown" %>
+                  <%= server.node ? server.node.name : "Unknown" %>
                 </td>
                 <td class="p-4 text-gray-400">
                   <%= image ? image.name : "Unknown" %>
@@ -61,18 +61,16 @@
                   <%= owner ? owner.username : "Unknown" %>
                 </td>
                 <td class="p-4 text-gray-400">
-                  <i data-lucide="cpu" class="inline w-4 h-4 mr-1"></i><%=
-                  server.core %>
+                  <i data-lucide="cpu" class="inline w-4 h-4 mr-1"></i><%= server.core %>
                 </td>
                 <td class="p-4 text-gray-400">
-                  <i data-lucide="memory-stick" class="inline w-4 h-4 mr-1"></i
-                  ><%= server.ram %> MB
+                  <i data-lucide="memory-stick" class="inline w-4 h-4 mr-1"></i><%= server.ram %> MB
                 </td>
                 <td class="p-4 text-gray-400"><%= server.port %></td>
                 <td class="p-4 text-right flex justify-end gap-2">
                   <!-- Suspend/Unsuspend button -->
                   <button
-                    onclick="toggleSuspend('<%= server.id %>', <%= server.suspended %>)"
+                    onclick="toggleSuspend('<%= server.id %>', '<%= server.suspended %>')"
                     class="px-3 py-1.5 rounded-xl text-sm flex items-center gap-2 <%= server.suspended ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-600 hover:bg-green-700' %>"
                   >
                     <i
@@ -81,6 +79,14 @@
                     ></i>
                     <%= server.suspended ? 'Unsuspend' : 'Suspend' %>
                   </button>
+
+                  <!-- Edit button -->
+                  <a
+                    href="/admin/edit/<%= server.id %>"
+                    class="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-xl text-sm flex items-center gap-2"
+                  >
+                    <i data-lucide="edit-2" class="w-4 h-4"></i> Edit
+                  </a>
 
                   <!-- Delete button -->
                   <button
@@ -104,7 +110,7 @@
       async function deleteServer(id) {
         if (!confirm("Are you sure you want to delete this server?")) return;
         const res = await fetch(`/admin/servers/delete/${id}`, {
-          method: "POST",
+          method: "DELETE",
         });
         if (res.ok) location.reload();
         else alert("Failed to delete server");

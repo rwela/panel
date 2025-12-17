@@ -2,7 +2,7 @@
 <html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
   <head>
     <meta charset="UTF-8" />
-    <title><%= name %> - New Server</title>
+    <title><%= name %> - Edit Server</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
   </head>
@@ -11,19 +11,18 @@
 
     <main class="flex-1 p-8 overflow-auto">
       <div class="max-w-xl mx-auto space-y-6">
-        <h1 class="text-3xl font-bold mb-4">🖥 Create New Server</h1>
+        <h1 class="text-3xl font-bold mb-4">🖥 Edit Server: <%= server.name %></h1>
 
-        <div
-          class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 space-y-4"
-        >
+        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 space-y-4">
           <!-- Select User -->
           <select
             id="user"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
           >
-            <option value="">Select User</option>
             <% users.forEach(u => { %>
-            <option value="<%= u.id %>"><%= u.username %></option>
+            <option value="<%= u.id %>" <%= u.id === server.userId ? "selected" : "" %>>
+              <%= u.username %>
+            </option>
             <% }) %>
           </select>
 
@@ -32,24 +31,24 @@
             id="node"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
           >
-            <option value="">Select Node</option>
             <% nodes.forEach(n => { %>
-            <option value="<%= n.id %>">
+            <option value="<%= n.id %>" <%= n.name === server.node.name ? "selected" : "" %>>
               <%= n.name %> (<%= n.ip %>:<%= n.port %>)
             </option>
             <% }) %>
           </select>
 
+          <!-- Select Image -->
           <select
             id="image"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
             onchange="loadImageEnv()"
           >
-            <option value="">Select Image</option>
             <% images.forEach(i => { %>
             <option
               value="<%= i.id %>"
               data-env="<%= encodeURIComponent(JSON.stringify(i.envs || {})) %>"
+              <%= i.id === server.imageId ? "selected" : "" %>
             >
               <%= i.name %>
             </option>
@@ -60,32 +59,38 @@
           <input
             id="name"
             placeholder="Server Name"
+            value="<%= server.name %>"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
           />
           <input
             id="ram"
             placeholder="RAM (MB)"
             type="number"
+            value="<%= server.ram %>"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
           />
           <input
             id="core"
             placeholder="CPU Cores"
             type="number"
+            value="<%= server.core %>"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
           />
           <input
             id="disk"
             placeholder="Disk (GB)"
             type="number"
+            value="<%= server.disk %>"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
           />
           <input
             id="port"
             placeholder="Port"
             type="number"
+            value="<%= server.port %>"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
           />
+
           <!-- ENV Editor -->
           <div class="space-y-2">
             <label class="text-sm text-gray-400">Environment Variables</label>
@@ -94,11 +99,11 @@
 
           <div class="flex justify-end">
             <button
-              onclick="createServer()"
-              id="createBtn"
-              class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl"
+              onclick="editServer()"
+              id="editBtn"
+              class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl"
             >
-              Create
+              Save Changes
             </button>
           </div>
         </div>
@@ -107,6 +112,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+      const serverEnv = <%- JSON.stringify(server.env || {}) %>;
+
       function loadImageEnv() {
         const select = document.getElementById("image");
         const option = select.options[select.selectedIndex];
@@ -116,22 +123,25 @@
         const envList = document.getElementById("envList");
         envList.innerHTML = "";
 
-        Object.entries(envs).forEach(([key, value]) => {
+        // Merge current server env with image defaults
+        const mergedEnv = { ...envs, ...serverEnv };
+
+        Object.entries(mergedEnv).forEach(([key, value]) => {
           const row = document.createElement("div");
           row.className = "flex gap-2";
 
           row.innerHTML = `
-        <input
-          value="${key}"
-          disabled
-          class="w-1/2 p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-gray-400"
-        />
-        <input
-          value="${value}"
-          data-key="${key}"
-          class="w-1/2 p-2 rounded-xl bg-neutral-950 border border-neutral-800"
-        />
-      `;
+            <input
+              value="${key}"
+              disabled
+              class="w-1/2 p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-gray-400"
+            />
+            <input
+              value="${value}"
+              data-key="${key}"
+              class="w-1/2 p-2 rounded-xl bg-neutral-950 border border-neutral-800"
+            />
+          `;
 
           envList.appendChild(row);
         });
@@ -147,14 +157,16 @@
         return env;
       }
 
-      async function createServer() {
-        const btn = document.getElementById("createBtn");
+      async function editServer() {
+        const btn = document.getElementById("editBtn");
         btn.disabled = true;
         const originalText = btn.textContent;
-        btn.textContent = "Creating…";
+        btn.textContent = "Saving…";
+
+        const serverId = "<%= server.id %>";
 
         try {
-          const res = await axios.post("/admin/servers/new", {
+          const res = await axios.post(`/admin/edit/${serverId}`, {
             userId: document.getElementById("user").value,
             nodeId: document.getElementById("node").value,
             imageId: document.getElementById("image").value,
@@ -163,22 +175,23 @@
             core: parseInt(document.getElementById("core").value),
             disk: parseInt(document.getElementById("disk").value),
             port: parseInt(document.getElementById("port").value),
-            env: collectEnv(),
+            env: collectEnv()
           });
 
           if (res.data.success) {
             window.location.href = "/admin/servers";
           } else {
-            throw new Error("Server creation failed");
+            throw new Error("Server update failed");
           }
         } catch (err) {
-          alert("Failed to create server");
+          alert("Failed to update server");
           console.error(err);
           btn.disabled = false;
           btn.textContent = originalText;
         }
       }
 
+      loadImageEnv();
       lucide.createIcons();
     </script>
   </body>

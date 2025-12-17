@@ -56,6 +56,34 @@ router.get("/server/manage/:id", requireAuth, withServer, (req, res) => {
   });
 });
 
+
+/**
+ * POST /server/size/:id
+ * gets the total server size
+ */
+router.post("/server/size/:id", requireAuth, withServer, async (req, res) => {
+  const server = getServerForUser(req.session.userId, req.params.id);
+  if (!server) return res.status(404).send("Server not found");
+  if (!server.node) return res.status(500).send("Server node not assigned");
+
+  const node = unsqh.list("nodes").find((n) => n.ip === server.node.ip);
+  if (!node) return res.status(404).send("Node not found");
+  let size;
+  try {
+    const response = await axios.get(
+      `${getNodeUrl(node)}/server/fs/${server.idt}/size`,
+      { params: { key: node.key } }
+    );
+    size = response.data.total; 
+  } catch (err) {
+    console.error("Error fetching server size:", err.response?.data || err.message);
+    size = 0;
+  }
+
+  res.json({ size }); 
+});
+
+
 /**
  * GET /server/files/:id
  * List files and folders for a server

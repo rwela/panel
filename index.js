@@ -4,6 +4,7 @@ const fs = require('fs');
 const session = require("express-session");
 const config = require("./config.json");
 const unsqh = require("./modules/db.js");
+const DBStore = require("./modules/db-session.js");
 
 // --- WebSocket support ---
 const expressWs = require('express-ws');
@@ -22,17 +23,18 @@ const newSettings = {
 };
 unsqh.put("settings", "app", newSettings);
 
-// --- Session middleware ---
 const sessionMiddleware = session({
   name: "sid",
+  store: new DBStore({ table: "sessions" }),
   secret: config.session_secret,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24 // 1 day
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
   }
 });
+
 app.use(sessionMiddleware);
 
 // --- Express setup ---
