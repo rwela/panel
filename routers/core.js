@@ -422,6 +422,7 @@ router.post("/admin/servers/new", requireAuth, requireAdmin, async (req, res) =>
       port,
       containerId,
       idt,
+      ports,
       env: finalEnv,
       suspended: false,
       createdAt: Date.now()

@@ -11,6 +11,9 @@
     <a href="/server/settings/<%= server %>" class="px-4 py-2 rounded-xl text-sm flex items-center gap-2 hover:bg-neutral-900" id="tab-settings">
       <i data-lucide="settings"></i> Settings
     </a>
+    <a href="/server/network/<%= server %>" class="px-4 py-2 rounded-xl text-sm flex items-center gap-2 hover:bg-neutral-900" id="tab-settings">
+      <i data-lucide="network"></i> Network
+    </a>
   </div>
  
 
@@ -18,15 +21,4 @@
 
 <script>
   lucide.createIcons();
-
-  const path = window.location.pathname;
-  const activeClass = 'bg-neutral-900';
-
-  if (path.includes('/server/manage/')) {
-    document.getElementById('tab-console').classList.add(...activeClass.split(' '));
-  } else if (path.includes('/server/files/')) {
-    document.getElementById('tab-files').classList.add(...activeClass.split(' '));
-  } else if (path.includes('/server/settings/')) {
-    document.getElementById('tab-settings').classList.add(...activeClass.split(' '));
-  }
 </script>

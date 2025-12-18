@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
+<head>
+  <meta charset="UTF-8">
+  <title><%= name %> - <%= server.name %> Network</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex">
+
+  <!-- Sidebar -->
+  <%- include('../components/sidebar', { name: name, user: user }) %>
+
+  <main class="flex-1 p-8 overflow-auto">
+    <div class="max-w-6xl mx-auto space-y-6">
+
+      <!-- Header -->
+          <div
+          class="bg-neutral-950 border border-neutral-900 rounded-2xl px-6 py-4 flex items-center justify-between"
+        >
+          <!-- LEFT INFO -->
+          <div class="flex items-start gap-3">
+            <div class="leading-tight">
+              <p class="text-lg font-semibold text-gray-100">
+                <%= server.name %>
+              </p>
+              <p class="text-sm text-gray-400">
+                <%= server.node?.ip || '0.0.0.0' %>:<%= server.port %>
+                <span class="mx-1"></span>
+                <%= server.node?.name || 'unknown' %>
+              </p>
+            </div>
+          </div>
+        </div>
+
+      <!-- Navigation -->
+      <%- include('../components/server_nav', { server: server.id }) %>
+
+      <!-- Current Ports -->
+      <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-4">
+        <h2 class="text-xl font-semibold flex items-center gap-2">
+          <i data-lucide="plug" class="w-5 h-5"></i>
+          Exposed Ports
+        </h2>
+
+        <% const ports = server.ports || (server.port ? [server.port] : []); %>
+
+        <% if (ports.length === 0) { %>
+          <p class="text-gray-500 italic">No ports assigned.</p>
+        <% } else { %>
+          <div class="space-y-3">
+            <% ports.forEach(p => { %>
+              <div class="flex items-center justify-between bg-neutral-900 rounded-xl px-4 py-3 border border-neutral-800">
+                <div class="flex items-center gap-3">
+                  <span class="text-lg font-mono"><%= p %></span>
+
+                  <% if (p === server.port) { %>
+                    <span class="text-xs px-2 py-1 rounded-full bg-indigo-600/20 text-indigo-400">
+                      Primary
+                    </span>
+                  <% } %>
+                </div>
+
+                <div class="flex gap-2">
+                  <% if (p !== server.port) { %>
+                    <form method="POST" action="/server/network/<%= server.id %>/setprimary/<%= p %>">
+                      <button
+                        class="px-3 py-1 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-700">
+                        Set Primary
+                      </button>
+                    </form>
+                  <% } %>
+
+                  <% if (ports.length > 1) { %>
+                    <form method="POST" action="/server/network/<%= server.id %>/remove/<%= p %>">
+                      <button
+                        class="px-3 py-1 text-sm rounded-lg bg-red-600 hover:bg-red-700">
+                        Remove
+                      </button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Add Port -->
+      <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-4">
+        <h2 class="text-xl font-semibold flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          Add New Port
+        </h2>
+
+        <form
+          onsubmit="event.preventDefault(); addPort();"
+          class="flex gap-3"
+        >
+          <input
+            id="new-port"
+            type="number"
+            min="1"
+            max="65535"
+            placeholder="3000"
+            class="flex-1 p-3 rounded-xl bg-neutral-950 border border-neutral-700 text-gray-100"
+            required
+          />
+
+          <button
+            type="submit"
+            class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700">
+            Add Port
+          </button>
+        </form>
+
+        <p class="text-sm text-gray-400">
+          Adding or removing ports will recreate the container.
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    function addPort() {
+      const port = document.getElementById('new-port').value;
+      if (!port) return;
+
+      window.location.href =
+        `/server/network/<%= server.id %>/add/${port}`;
+    }
+  </script>
+
+</body>
+</html>
