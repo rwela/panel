@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <title><%= name %> - <%= server.name %> Settings</title>
 
-    <!-- Tailwind (kept your CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/tailwind.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- small helper styles for transitions (Tailwind utilities used too) -->
@@ -61,7 +60,7 @@
               data-target="tab-general"
               data-state="active"
               aria-selected="true"
-              class="tab-btn inline-flex h-7 items-center justify-center rounded-md px-3 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 data-[state=active]:bg-neutral-700 data-[state=active]:text-neutral-100"
+              class="tab-btn inline-flex h-7 items-center justify-center rounded-md px-3 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 data-[state=active]:bg-neutral-700 data-[state=active]:text-neutral-100 cursor-pointer"
               id="tabbtn-general"
             >
               General
@@ -87,7 +86,7 @@
               data-target="tab-danger"
               data-state="inactive"
               aria-selected="false"
-              class="tab-btn inline-flex h-7 items-center justify-center rounded-md px-3 text-sm font-medium transition text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 data-[state=active]:bg-neutral-700 data-[state=active]:text-neutral-100"
+              class="tab-btn inline-flex h-7 items-center justify-center cursor-pointer rounded-md px-3 text-sm font-medium transition text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 data-[state=active]:bg-neutral-700 data-[state=active]:text-neutral-100"
               id="tabbtn-danger"
             >
               Danger

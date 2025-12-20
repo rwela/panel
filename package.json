@@ -4,7 +4,8 @@
   "description": "can we replace pterodactyl forever? like can we? everything is not impossible",
   "main": "index.js",
   "scripts": {
-    "admin": "node exec/adminsys"
+    "admin": "node exec/adminsys",
+    "tmkc": "npx @tailwindcss/cli -i ./public/tw.conf -o ./public/assets/tailwind.css --watch"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   },
   "homepage": "https://github.com/HydrenFOSS/Talorix#readme",
   "dependencies": {
+    "@tailwindcss/cli": "^4.1.18",
     "axios": "^1.13.2",
     "ejs": "^3.1.10",
     "express": "^5.2.1",
@@ -31,6 +33,7 @@
     "prompts": "^2.4.2",
     "qrcode": "^1.5.4",
     "speakeasy": "^2.0.0",
+    "tailwindcss": "^4.1.18",
     "ws": "^8.18.3"
   }
 }
