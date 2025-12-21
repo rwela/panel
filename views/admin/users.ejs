@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= name %> - Users</title>
+  <link rel="stylesheet" href="/assets/tailwind.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex">
+  <%- include('../components/sidebar', { name, user }) %>
+
+  <main class="flex-1 p-8 overflow-auto">
+    <div class="max-w-6xl mx-auto space-y-6">
+
+      <!-- Header -->
+      <div class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold flex items-center gap-2">
+            <i data-lucide="users" class="w-6 h-6"></i> Users
+          </h1>
+          <p class="text-gray-400">Manage all users</p>
+        </div>
+
+        <form action="/admin/users/new" method="post" class="flex gap-2">
+          <input name="email" placeholder="Email" class="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2">
+          <input name="username" placeholder="Username" class="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2">
+          <input name="password" placeholder="Password" type="password" class="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2">
+          <button class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl">
+            + Create
+          </button>
+        </form>
+      </div>
+
+      <!-- Users Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% users.forEach(u => { %>
+          <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="<%= u.admin ? 'shield' : 'user' %>" class="w-4 h-4 <%= u.admin ? 'text-indigo-400' : 'text-gray-400' %>"></i>
+                <span class="font-semibold"><%= u.username %></span>
+              </div>
+              <div class="text-sm text-gray-400"><%= u.email %></div>
+              <div class="text-xs text-gray-500 mt-2">
+                Servers: <%= u.servers?.length || 0 %>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+              <a href="/admin/user/<%= u.id %>" class="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-xl text-sm">
+                View
+              </a>
+              <a href="/admin/user/<%= u.id %>/edit" class="bg-neutral-800 hover:bg-neutral-700 px-3 py-1.5 rounded-xl text-sm">
+                Edit
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+    </div>
+  </main>
+
+  <script>lucide.createIcons()</script>
+</body>
+</html>

@@ -83,13 +83,13 @@
             value="<%= server.disk %>"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
           />
-          <input
+          <!--input
             id="port"
             placeholder="Port"
             type="number"
             value="<%= server.port %>"
             class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
-          />
+          /--->
 
           <!-- ENV Editor -->
           <div class="space-y-2">
@@ -174,7 +174,7 @@
             ram: parseInt(document.getElementById("ram").value),
             core: parseInt(document.getElementById("core").value),
             disk: parseInt(document.getElementById("disk").value),
-            port: parseInt(document.getElementById("port").value),
+       //     port: parseInt(document.getElementById("port").value),
             env: collectEnv()
           });
 

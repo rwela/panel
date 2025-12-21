@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= name %> - Edit Node</title>
+  <link rel="stylesheet" href="/assets/tailwind.css" />
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="flex h-screen">
+
+  <!-- Sidebar -->
+  <%- include('../components/sidebar', { name, user }) %>
+
+  <!-- Main -->
+  <main class="flex-1 overflow-auto p-8 flex flex-col gap-6">
+
+    <h1 class="text-3xl font-bold">🖥 Edit Node — <%= node.name %></h1>
+
+    <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-6">
+
+      <!-- Row 1 -->
+      <div class="flex flex-col md:flex-row gap-4">
+
+        <div class="flex-1">
+          <label class="block text-sm text-gray-400 mb-2">Name</label>
+          <input
+            name="name"
+            form="nodeEditForm"
+            value="<%= node.name %>"
+            class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
+          />
+        </div>
+
+        <div class="w-40">
+          <label class="block text-sm text-gray-400 mb-2">RAM (MB)</label>
+          <input
+            name="ram"
+            form="nodeEditForm"
+            type="number"
+            value="<%= node.ram %>"
+            class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
+          />
+        </div>
+
+        <div class="w-40">
+          <label class="block text-sm text-gray-400 mb-2">Cores</label>
+          <input
+            name="core"
+            form="nodeEditForm"
+            type="number"
+            value="<%= node.core %>"
+            class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
+          />
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <div>
+          <label class="block text-sm text-gray-400 mb-2">IP</label>
+          <input
+            name="ip"
+            form="nodeEditForm"
+            value="<%= node.ip %>"
+            class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm text-gray-400 mb-2">Port</label>
+          <input
+            name="port"
+            form="nodeEditForm"
+            value="<%= node.port %>"
+            class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800"
+          />
+        </div>
+
+        <div class="group">
+          <label class="block text-sm text-gray-400 mb-2">Node Key</label>
+
+          <div class="relative">
+            <input
+              value="<%= node.key %>"
+              disabled
+              class="
+                w-full p-3 rounded-xl
+                bg-neutral-900 border border-neutral-800
+                text-gray-400
+                blur-sm opacity-60
+                transition-all duration-300 ease-out
+                group-hover:blur-none
+                group-hover:opacity-100
+                group-hover:scale-[1.01]
+              "
+            />
+
+            <span
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none"
+            >
+              hover
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-3">
+
+        <form
+          id="nodeEditForm"
+          action="/admin/node/<%= req.params.id %>/edit"
+          method="post"
+          class="hidden"
+        ></form>
+
+        <button
+          type="submit"
+          form="nodeEditForm"
+          id="saveBtn"
+          class="bg-blue-600 cursor-pointer hover:bg-blue-700 px-6 py-3 rounded-xl flex items-center gap-2 transition"
+        >
+          <i data-lucide="save"></i>
+          Save
+        </button>
+
+        <a
+          href="/admin/nodes"
+          class="px-6 py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 transition"
+        >
+          Cancel
+        </a>
+
+        <form
+          action="/admin/node/<%= req.params.id %>/delete"
+          method="post"
+          onsubmit="return confirm('Delete this node? This cannot be undone');"
+        >
+          <button
+            type="submit"
+            class="cursor-pointer px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition"
+          >
+            Delete
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    document.getElementById("saveBtn").addEventListener("click", (e) => {
+      const f = document.getElementById("nodeEditForm");
+      if (
+        !f.name.value ||
+        !f.ip.value ||
+        !f.port.value ||
+        !f.ram.value ||
+        !f.core.value
+      ) {
+        e.preventDefault();
+        alert("All fields are required.");
+      }
+    });
+  </script>
+
+</body>
+</html>

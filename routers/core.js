@@ -379,6 +379,261 @@ router.get(
 );
 
 /**
+ * GET /admin/node/:id/edit
+ * Render edit page (redirect to /admin/nodes if node missing)
+ */
+router.get(
+  "/admin/node/:id/edit",
+  requireAuth,
+  requireAdmin,
+  async (req, res) => {
+    const node = unsqh.get("nodes", req.params.id);
+    if (!node) return res.redirect("/admin/nodes");
+
+    const status = await checkNodeHealth(node);
+    if (node.status !== status) {
+         unsqh.update("nodes", req.params.id, { status });
+         node.status = status;
+    }
+
+    const settings = unsqh.get("settings", "app") || {};
+    const appName = settings.name || "App";
+    const user = unsqh.get("users", req.session.userId);
+
+    res.render("admin/node-edit", {
+      name: appName,
+      user,
+      node,
+      req,
+    });
+  }
+);
+
+/**
+ * POST /admin/node/:id/edit
+ * Update node fields and redirect back to the node page
+ * body: { name, ram, core, ip, port }
+ */
+router.post(
+  "/admin/node/:id/edit",
+  requireAuth,
+  requireAdmin,
+  (req, res) => {
+    const node = unsqh.get("nodes", req.params.id);
+    if (!node) return res.redirect("/admin/nodes");
+
+    const { name, ram, core, ip, port } = req.body;
+
+    if (!name || !ram || !core || !ip || !port) {
+      return res.status(400).json({ error: "Missing fields" });
+    }
+
+    const updates = {
+      name,
+      ram,
+      core,
+      ip,
+      port,
+    };
+
+    unsqh.update("nodes", req.params.id, updates);
+
+    res.redirect(`/admin/node/${req.params.id}`);
+  }
+);
+
+/**
+ * GET /admin/users
+ * List all users
+ */
+router.get("/admin/users", requireAuth, requireAdmin, (req, res) => {
+  const users = unsqh.list("users") || [];
+  const settings = unsqh.get("settings", "app") || {};
+  const appName = settings.name || "App";
+  const user = unsqh.get("users", req.session.userId);
+
+  res.render("admin/users", {
+    name: appName,
+    user,
+    users,
+  });
+});
+
+/**
+ * GET /admin/user/:id
+ * Show user info (admin)
+ */
+router.get("/admin/user/:id", requireAuth, requireAdmin, (req, res) => {
+  const target = unsqh.get("users", req.params.id);
+  if (!target) return res.status(404).send("User not found");
+
+  // Make a safe copy (don't render password)
+  const { password, twoFactorSecret, ...safeTarget } = target;
+
+  // Resolve servers (they may be embedded objects)
+  const servers = (target.servers || []).map((s) =>
+    typeof s === "string" ? unsqh.get("servers", s) : s
+  );
+
+  const settings = unsqh.get("settings", "app") || {};
+  const appName = settings.name || "App";
+  const user = unsqh.get("users", req.session.userId);
+
+  res.render("admin/user", {
+    name: appName,
+    user,
+    target: safeTarget,
+    fullTarget: target, // for actions if needed
+    servers,
+  });
+});
+
+/**
+ * GET /admin/user/:id/edit
+ * Render user edit page
+ */
+router.get("/admin/user/:id/edit", requireAuth, requireAdmin, (req, res) => {
+  const target = unsqh.get("users", req.params.id);
+  if (!target) return res.redirect("/admin/users");
+
+  const { password, twoFactorSecret, ...safeTarget } = target;
+  const settings = unsqh.get("settings", "app") || {};
+  const appName = settings.name || "App";
+  const user = unsqh.get("users", req.session.userId);
+
+  res.render("admin/user-edit", {
+    name: appName,
+    user,
+    target: safeTarget,
+  });
+});
+
+/**
+ * POST /admin/user/:id/edit
+ * Edit user fields. body: { email?, username?, password?, admin? }
+ */
+router.post("/admin/user/:id/edit", requireAuth, requireAdmin, (req, res) => {
+  const target = unsqh.get("users", req.params.id);
+  if (!target) return res.status(404).json({ error: "User not found" });
+
+  const { email, username, password, admin } = req.body;
+  const updates = {};
+
+  if (email) updates.email = String(email).trim();
+  if (username) updates.username = String(username).trim();
+  if (typeof admin !== "undefined") updates.admin = admin === "true" || admin === true;
+
+  // If password provided - hash it
+  if (password && password.trim() !== "") {
+    const hash = crypto.createHash("sha256").update(String(password)).digest("hex");
+    updates.password = hash;
+  }
+
+  unsqh.update("users", req.params.id, updates);
+
+  // Redirect back to user info page
+  res.redirect(`/admin/user/${req.params.id}`);
+});
+
+/**
+ * POST /admin/users/new
+ * Create a new user (admin)
+ * body: { email, username, password, admin? }
+ */
+router.post("/admin/users/new", requireAuth, requireAdmin, (req, res) => {
+  const { email, username, password, admin } = req.body;
+
+  if (!email || !username || !password) {
+    return res.status(400).json({ error: "Email, username, and password are required" });
+  }
+
+  const existing = unsqh.list("users").find(u => u.email === email);
+  if (existing) {
+    return res.status(409).json({ error: "User with this email already exists" });
+  }
+
+  const id = crypto.randomUUID();
+  const hash = crypto.createHash("sha256").update(password).digest("hex");
+
+  const newUser = {
+    id,
+    email,
+    username,
+    password: hash,
+    admin: admin === "true" || admin === true,
+    servers: [],
+    createdAt: Date.now(),
+  };
+
+  unsqh.put("users", id, newUser);
+
+  res.redirect("/admin/users");
+});
+
+/**
+ * POST /admin/user/:id/delete
+ * Delete a user (admin). Prevent self-delete.
+ */
+router.post("/admin/user/:id/delete", requireAuth, requireAdmin, async (req, res) => {
+  const targetId = req.params.id;
+  if (req.session.userId === targetId) {
+    return res.status(400).json({ error: "You cannot delete your own account" });
+  }
+
+  const target = unsqh.get("users", targetId);
+  if (!target) return res.status(404).json({ error: "User not found" });
+
+  // Clean up user's servers (if any)
+  const userServers = Array.isArray(target.servers) ? target.servers : [];
+
+  for (const s of userServers) {
+    const server = typeof s === "string" ? unsqh.get("servers", s) : s;
+    if (!server) continue;
+
+    // Find node for this server
+    const node =
+      unsqh.list("nodes").find((n) => n.id === server.node?.id) ||
+      unsqh.list("nodes").find((n) => n.ip === server.node?.ip);
+
+    // Try to instruct node to remove container (best-effort)
+    if (node && server.idt) {
+      try {
+        await axios.delete(`http://${node.ip}:${node.port}/server/delete/${server.idt}?key=${node.key}`);
+      } catch (err) {
+        console.warn("Failed to delete server on node for user deletion:", err.message);
+      }
+    }
+
+    // Free node allocations owned by this server
+    if (node && Array.isArray(node.allocations)) {
+      let changed = false;
+      node.allocations.forEach((a) => {
+        if (a.allocationOwnedto?.serverId === server.id) {
+          a.allocationOwnedto = null;
+          a.type = "";
+          changed = true;
+        }
+      });
+      if (changed) unsqh.update("nodes", node.id, { allocations: node.allocations });
+    }
+
+    // Remove server from global servers store
+    try {
+      unsqh.delete("servers", server.id);
+    } catch (err) {
+      // continue even if server deletion fails
+    }
+  }
+
+  // Finally delete user
+  unsqh.delete("users", targetId);
+
+  // Redirect back to users list
+  res.redirect("/admin/users");
+});
+
+
+/**
  * GET /admin/images
  * List all images
  */
@@ -515,6 +770,30 @@ router.get("/admin/servers", requireAuth, requireAdmin, (req, res) => {
     users,
     nodes,
     images,
+  });
+});
+
+/**
+ * GET /admin/server/:id
+ * View specific server (admin)
+ */
+router.get("/admin/server/:id", requireAuth, requireAdmin, (req, res) => {
+  const server = unsqh.get("servers", req.params.id);
+  if (!server) return res.status(404).send("Server not found");
+
+  const settings = unsqh.get("settings", "app") || {};
+  const appName = settings.name || "App";
+  const user = unsqh.get("users", req.session.userId);
+
+  const owner = unsqh.get("users", server.userId);
+  const image = unsqh.get("images", server.imageId);
+
+  res.render("admin/server", {
+    name: appName,
+    user,
+    server,
+    owner,
+    image,
   });
 });
 
@@ -718,7 +997,7 @@ router.post(
       ram,
       core,
       disk,
-      port,
+    //  port,
       env: newEnv = {},
       files: newFiles = [],
       imageId,
@@ -768,7 +1047,7 @@ router.post(
           ram: ram || server.ram,
           core: core || server.core,
           disk: disk || server.disk,
-          port: port || server.port,
+          port: server.port,
           files: resolvedFiles,
         },
         { params: { key: node.key, idt: server.idt } }
@@ -781,7 +1060,7 @@ router.post(
       server.ram = ram || server.ram;
       server.core = core || server.core;
       server.disk = disk || server.disk;
-      server.port = port || server.port;
+      server.port = server.port;
       server.env = mergedEnv;
       server.imageId = image.id;
       server.containerId = containerId;
@@ -812,10 +1091,10 @@ router.post(
 );
 
 /**
- * GET /admin/edit/:serverId
+ * GET /admin/server/edit/:serverId
  * Render admin server edit page
  */
-router.get("/admin/edit/:serverId", requireAuth, requireAdmin, (req, res) => {
+router.get("/admin/server/edit/:serverId", requireAuth, requireAdmin, (req, res) => {
   const { serverId } = req.params;
   const server = unsqh.get("servers", serverId);
   if (!server) return res.status(404).send("Server not found");

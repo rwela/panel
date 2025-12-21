@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= name %> - <%= server.name %></title>
+  <link rel="stylesheet" href="/assets/tailwind.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="min-h-screen flex">
+  <%- include('../components/sidebar', { name, user }) %>
+
+  <main class="flex-1 p-8 overflow-auto">
+    <div class="max-w-5xl mx-auto space-y-6">
+
+      <!-- Header -->
+      <div class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold flex items-center gap-2">
+            <i data-lucide="server" class="w-6 h-6"></i>
+            <%= server.name %>
+          </h1>
+          <p class="text-gray-400">
+            <%= server.node?.name || "Unknown Node" %>
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <a href="/admin/server/edit/<%= server.id %>"
+            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl">
+            Edit
+          </a>
+
+          <button onclick="deleteServer('<%= server.id %>')"
+            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl">
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Specs -->
+        <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl space-y-3">
+          <h2 class="font-semibold flex items-center gap-2">
+            <i data-lucide="activity" class="w-4 h-4"></i> Resources
+          </h2>
+          <div class="text-sm text-gray-400">CPU: <span class="text-gray-200"><%= server.core %> cores</span></div>
+          <div class="text-sm text-gray-400">RAM: <span class="text-gray-200"><%= server.ram %> MB</span></div>
+          <div class="text-sm text-gray-400">Disk: <span class="text-gray-200"><%= server.disk %> GB</span></div>
+          <div class="text-sm text-gray-400">Port: <span class="text-gray-200"><%= server.port %></span></div>
+        </div>
+
+        <!-- Ownership -->
+        <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl space-y-3">
+          <h2 class="font-semibold flex items-center gap-2">
+            <i data-lucide="user" class="w-4 h-4"></i> Ownership
+          </h2>
+          <div class="text-sm text-gray-400">
+            Owner:
+            <a href="/admin/user/<%= owner?.id %>" class="text-indigo-400 hover:underline">
+              <%= owner?.username || "Unknown" %>
+            </a>
+          </div>
+          <div class="text-sm text-gray-400">
+            Image: <span class="text-gray-200"><%= image?.name || "Unknown" %></span>
+          </div>
+          <div class="text-sm text-gray-400">
+            Created: <span class="text-gray-200"><%= new Date(server.createdAt).toLocaleString() %></span>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl space-y-3">
+          <h2 class="font-semibold flex items-center gap-2">
+            <i data-lucide="power" class="w-4 h-4"></i> Status
+          </h2>
+
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-gray-400">State:</span>
+            <span class="<%= server.suspended ? 'text-yellow-400' : 'text-green-400' %> font-medium">
+              <%= server.suspended ? 'Suspended' : 'Active' %>
+            </span>
+          </div>
+
+          <button
+            onclick="toggleSuspend('<%= server.id %>', '<%= server.suspended %>')"
+            class="w-full mt-2 px-3 py-2 rounded-xl text-sm
+              <%= server.suspended
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-yellow-500 hover:bg-yellow-600' %>">
+            <%= server.suspended ? 'Unsuspend' : 'Suspend' %>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    async function deleteServer(id) {
+      if (!confirm("Delete this server? This cannot be undone.")) return;
+      const res = await fetch(`/admin/servers/delete/${id}`, { method: "DELETE" });
+      if (res.ok) window.location.href = "/admin/servers";
+      else alert("Failed to delete server");
+    }
+
+    async function toggleSuspend(id, suspended) {
+      const action = suspended === "true" ? "unsuspend" : "suspend";
+      const res = await fetch(`/admin/servers/${action}/${id}`, { method: "POST" });
+      if (res.ok) location.reload();
+      else alert("Action failed");
+    }
+  </script>
+</body>
+</html>

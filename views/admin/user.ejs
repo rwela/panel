@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= name %> - User Info</title>
+  <link rel="stylesheet" href="/assets/tailwind.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex">
+  <%- include('../components/sidebar', { name, user }) %>
+
+  <main class="flex-1 p-8 overflow-auto">
+    <div class="max-w-5xl mx-auto space-y-6">
+
+      <!-- Header -->
+      <div class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold flex items-center gap-2">
+            <i data-lucide="user" class="w-6 h-6"></i>
+            <%= target.username %>
+          </h1>
+          <p class="text-gray-400"><%= target.email %></p>
+        </div>
+
+        <div class="flex gap-2">
+          <a href="/admin/user/<%= target.id %>/edit"
+            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl">
+            Edit
+          </a>
+
+          <form action="/admin/user/<%= target.id %>/delete" method="post">
+            <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl">
+              Delete
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl space-y-3">
+        <div><span class="text-gray-400">User ID:</span> <%= target.id %></div>
+        <div><span class="text-gray-400">Admin:</span> <%= target.admin ? 'Yes' : 'No' %></div>
+        <!--<div><span class="text-gray-400">Created:</span> <%= new Date(target.createdAt).toLocaleString() %></div--->
+      </div>
+
+      <!-- Servers -->
+      <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl">
+        <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+          <i data-lucide="server" class="w-5 h-5"></i> Servers
+        </h2>
+
+        <% if (target.servers.length) { %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <% target.servers.forEach(s => { %>
+              <a 
+                class="bg-neutral-900 border border-neutral-800 rounded-xl p-4 hover:border-indigo-600 transition">
+                <div class="font-medium"><%= s.name %></div>
+                <div class="text-sm text-gray-400">
+                  <%= s.node?.name || 'Unknown Node' %>
+                </div>
+              </a>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-gray-500">No servers assigned.</p>
+        <% } %>
+      </div>
+
+    </div>
+  </main>
+
+  <script>lucide.createIcons()</script>
+</body>
+</html>

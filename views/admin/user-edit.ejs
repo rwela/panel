@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-neutral-950 text-gray-100 font-Figtree">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= name %> - Edit User</title>
+  <link rel="stylesheet" href="/assets/tailwind.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex">
+  <%- include('../components/sidebar', { name, user }) %>
+
+  <main class="flex-1 p-8 overflow-auto">
+    <div class="max-w-3xl mx-auto space-y-6">
+
+      <!-- Header -->
+      <div class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl">
+        <h1 class="text-3xl font-bold flex items-center gap-2">
+          <i data-lucide="edit-2" class="w-6 h-6"></i>
+          Edit User
+        </h1>
+      </div>
+
+      <!-- Form -->
+      <form
+        action="/admin/user/<%= target.id %>/edit"
+        method="post"
+        class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl space-y-4"
+      >
+
+        <div>
+          <label class="text-sm text-gray-400">Email</label>
+          <input name="email" value="<%= target.email %>"
+            class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800">
+        </div>
+
+        <div>
+          <label class="text-sm text-gray-400">Username</label>
+          <input name="username" value="<%= target.username %>"
+            class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800">
+        </div>
+
+        <div>
+          <label class="text-sm text-gray-400">New Password</label>
+          <input name="password" type="password"
+            class="w-full p-3 rounded-xl bg-neutral-950 border border-neutral-800">
+        </div>
+
+        <label class="flex items-center gap-2 text-sm text-gray-400">
+          <input type="checkbox" name="admin" value="true" <%= target.admin ? 'checked' : '' %>>
+          Administrator
+        </label>
+
+        <div class="flex gap-2">
+          <button class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-xl">
+            Save
+          </button>
+          <a href="/admin/user/<%= target.id %>"
+            class="bg-neutral-800 hover:bg-neutral-700 px-6 py-3 rounded-xl">
+            Cancel
+          </a>
+        </div>
+      </form>
+
+    </div>
+  </main>
+
+  <script>lucide.createIcons()</script>
+</body>
+</html>

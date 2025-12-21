@@ -34,7 +34,7 @@
        const image = images.find(i => i.id === server.imageId); 
        const owner = users.find(u => u.id === server.userId); 
   %>
-    <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
+    <div onclick="goToServer('<%= server.id %>')" class="cursor-pointer hover:border hover:border-neutral-900 bg-neutral-950 border border-neutral-800 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
       
       <!-- Top: Name & Node -->
       <div class="flex justify-between items-center mb-4">
@@ -71,7 +71,7 @@
         </button>
 
         <!-- Edit -->
-        <a href="/admin/edit/<%= server.id %>"
+        <a href="/admin/server/edit/<%= server.id %>"
           class="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-xl text-sm flex items-center gap-2">
           <i data-lucide="edit-2" class="w-4 h-4"></i> Edit
         </a>
@@ -109,6 +109,9 @@
         if (res.ok) location.reload();
         else alert(`Failed to ${action} server`);
       }
+       function goToServer(id) {
+    window.location.href = `/admin/server/${id}`;
+  }
     </script>
   </body>
 </html>

@@ -373,6 +373,7 @@
             logLine.classList.add("whitespace-pre");
 
             const text = document.createElement("span");
+            text.classList.add('font-mono');
             text.innerHTML = ansiToHtml(message);
 
             logLine.appendChild(text);

@@ -72,8 +72,8 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
   <% nodes.forEach(node => { %>
     <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
-      
-      <!-- Top: Status and Name -->
+
+      <!-- Top -->
       <div class="flex justify-between items-center mb-4">
         <div class="flex items-center gap-2">
           <% if (node.status === "online") { %>
@@ -88,8 +88,8 @@
         <span class="text-gray-400 text-sm"><%= node.ip %>:<%= node.port %></span>
       </div>
 
-      <!-- Middle: Specs with Labels -->
-      <div class="grid grid-cols-2 gap-4 mb-4 text-gray-400 text-sm">
+      <!-- Specs -->
+      <div class="grid grid-cols-2 gap-4 mb-6 text-gray-400 text-sm">
         <div>
           <span class="font-medium text-gray-300">CPU:</span> <%= node.core %> Cores
         </div>
@@ -98,13 +98,43 @@
         </div>
       </div>
 
-      <!-- Bottom: Actions -->
-      <div class="text-right">
-        <a href="/admin/node/<%= node.id %>" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-xl text-sm transition">
-          <i data-lucide="settings" class="w-4 h-4"></i> Manage
-        </a>
-      </div>
+      <!-- Actions -->
+      <div class="flex justify-end gap-2">
 
+        <!-- Manage -->
+        <a
+          href="/admin/node/<%= node.id %>"
+          class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-xl text-sm transition"
+        >
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          Manage
+        </a>
+
+        <!-- Edit -->
+        <a
+          href="/admin/node/<%= node.id %>/edit"
+          class="inline-flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 px-3 py-2 rounded-xl text-sm transition"
+        >
+          <i data-lucide="edit-3" class="w-4 h-4"></i>
+          Edit
+        </a>
+
+        <!-- Delete -->
+        <form
+          action="/admin/node/<%= node.id %>/delete"
+          method="post"
+          onsubmit="return confirm('Delete node \"<%= node.name %>\"? This cannot be undone.');"
+        >
+          <button
+            type="submit"
+            class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 px-3 py-2 rounded-xl text-sm transition"
+          >
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Delete
+          </button>
+        </form>
+
+      </div>
     </div>
   <% }) %>
 </div>
