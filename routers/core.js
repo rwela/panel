@@ -119,7 +119,7 @@ router.get("/admin/nodes", requireAuth, requireAdmin, async (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/nodes", {
+  res.render("admin/node/nodes", {
     name: appName,
     user,
     nodes,
@@ -182,7 +182,7 @@ router.get("/admin/node/:id", requireAuth, requireAdmin, async (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/node", {
+  res.render("admin/node/node", {
     name: appName,
     user,
     node,
@@ -400,7 +400,7 @@ router.get(
     const appName = settings.name || "App";
     const user = unsqh.get("users", req.session.userId);
 
-    res.render("admin/node-edit", {
+    res.render("admin/node/node-edit", {
       name: appName,
       user,
       node,
@@ -452,7 +452,7 @@ router.get("/admin/users", requireAuth, requireAdmin, (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/users", {
+  res.render("admin/users/users", {
     name: appName,
     user,
     users,
@@ -479,7 +479,7 @@ router.get("/admin/user/:id", requireAuth, requireAdmin, (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/user", {
+  res.render("admin/users/user", {
     name: appName,
     user,
     target: safeTarget,
@@ -501,7 +501,7 @@ router.get("/admin/user/:id/edit", requireAuth, requireAdmin, (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/user-edit", {
+  res.render("admin/users/user-edit", {
     name: appName,
     user,
     target: safeTarget,
@@ -643,7 +643,7 @@ router.get("/admin/images", requireAuth, requireAdmin, (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/images", { name: appName, user, images });
+  res.render("admin/images/images", { name: appName, user, images });
 });
 
 /**
@@ -655,7 +655,7 @@ router.get("/admin/images/new", requireAuth, requireAdmin, (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/new-image", { name: appName, user });
+  res.render("admin/images/new-image", { name: appName, user });
 });
 
 /**
@@ -670,7 +670,7 @@ router.get("/admin/image/:id", requireAuth, requireAdmin, (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/image", { name: appName, user, image });
+  res.render("admin/images/image", { name: appName, user, image });
 });
 
 /**
@@ -763,7 +763,7 @@ router.get("/admin/servers", requireAuth, requireAdmin, (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/servers", {
+  res.render("admin/server/servers", {
     name: appName,
     user,
     servers,
@@ -788,7 +788,7 @@ router.get("/admin/server/:id", requireAuth, requireAdmin, (req, res) => {
   const owner = unsqh.get("users", server.userId);
   const image = unsqh.get("images", server.imageId);
 
-  res.render("admin/server", {
+  res.render("admin/server/server", {
     name: appName,
     user,
     server,
@@ -811,7 +811,7 @@ router.get("/admin/servers", requireAuth, requireAdmin, (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/servers", {
+  res.render("admin/server/servers", {
     name: appName,
     user,
     servers,
@@ -834,7 +834,7 @@ router.get("/admin/servers/new", requireAuth, requireAdmin, (req, res) => {
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
 
-  res.render("admin/new-server", { name: appName, user, nodes, images, users });
+  res.render("admin/server/new-server", { name: appName, user, nodes, images, users });
 });
 
 /**
@@ -1107,7 +1107,7 @@ router.get("/admin/server/edit/:serverId", requireAuth, requireAdmin, (req, res)
   const settings = unsqh.get("settings", "app") || {};
   const appName = settings.name || "App";
 
-  res.render("admin/edit-server", {
+  res.render("admin/server/edit-server", {
     name: appName,
     user,
     server,

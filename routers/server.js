@@ -142,7 +142,7 @@ router.get("/server/files/:id", requireAuth, withServer, async (req, res) => {
     files = [];
   }
 
-  res.render("server/files", {
+  res.render("server/files/index", {
     name: appName,
     user,
     server,
@@ -194,7 +194,7 @@ router.get(
       const appName = settings.name || "App";
       const user = unsqh.get("users", req.session.userId);
 
-      res.render("server/file-content", {
+      res.render("server/files/edit", {
         server,
         content: response.data.content,
         location,

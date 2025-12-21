@@ -1,7 +1,6 @@
 # Logs
 logs
-node
-config.json
+node1
 database.unsqh
 *.log
 npm-debug.log*
