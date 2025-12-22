@@ -388,6 +388,7 @@
           let consoleWs;
 
           function ccws() {
+            if (consoleWs && consoleWs.readyState === WebSocket.OPEN) return;
             consoleWs = new WebSocket(
               `${protocol}://${window.location.hostname}${
                 window.location.port ? ":" + window.location.port : ""
@@ -438,16 +439,10 @@
 
             consoleWs.onerror = () => addLog("ERROR", "WebSocket error");
           }
-          let ift = false;
-          setInterval(() => {
-            if (itsopendawg && ift === false) {
-              ccws();
-              ift = true;
-            } else {
-            }
-          }, 200);
+          ccws();
           let statsWs;
           function csws() {
+            if (statsWs && statsWs.readyState === WebSocket.OPEN) return;
             statsWs = new WebSocket(
               `${protocol}://${window.location.hostname}${
                 window.location.port ? ":" + window.location.port : ""
