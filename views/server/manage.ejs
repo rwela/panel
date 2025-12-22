@@ -152,7 +152,6 @@
     </button>
   </div>
 </div>
-
         </div>
 
           <!-- Charts -->
@@ -385,7 +384,7 @@
           // --- WebSockets ---
           const protocol = window.location.protocol === "https:" ? "wss" : "ws";
           const serverId = "<%= server.id %>";
-          const containerId = "<%= server.containerId %>";
+          const containerId = "<%= server.idt %>";
           let consoleWs;
 
           function ccws() {
@@ -627,6 +626,9 @@
             }
 
             try {
+              if (action === "start" || action === "restart") {
+                 logContainer.innerHTML = ""
+              }
               if (
                 typeof consoleWs !== "undefined" &&
                 consoleWs.readyState === WebSocket.OPEN
@@ -640,7 +642,7 @@
                 // Track server running state
                 if (action === "start" || action === "restart")
                   serverRunning = true;
-                if (action === "stop") serverRunning = false;
+                if (action === "stop") logContainer.innerHTML = ""; serverRunning = false;
               } else {
                 addLog(
                   "ERROR",

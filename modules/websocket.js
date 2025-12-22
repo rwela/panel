@@ -26,11 +26,13 @@ module.exports = (app) => {
       return;
     }
 
+    // IMPORTANT: send the TID (serverData.idt) to the node as containerId.
+    // The node will resolve this TID into the current containerId from data.json.
     const nodeWs = new WebSocket(`ws://${node.ip}:${node.port}`);
 
     nodeWs.on("open", () => {
       nodeWs.send(JSON.stringify({ event: "auth", payload: { key: node.key } }));
-      nodeWs.send(JSON.stringify({ event: "logs", payload: { containerId: serverData.containerId } }));
+      nodeWs.send(JSON.stringify({ event: "logs", payload: { containerId: serverData.idt } }));
     });
 
     nodeWs.on("message", (msg) => {
@@ -59,6 +61,7 @@ module.exports = (app) => {
     });
 
     ws.on("message", (msg) => {
+      // forward client messages to node. The client should also send TID (not stale containerId).
       if (nodeWs.readyState === WebSocket.OPEN) nodeWs.send(msg);
     });
 
@@ -99,8 +102,8 @@ module.exports = (app) => {
     nodeWs.on("open", () => {
       nodeWs.send(JSON.stringify({ event: "auth", payload: { key: node.key } }));
 
-      // Start streaming stats instead of logs
-      nodeWs.send(JSON.stringify({ event: "stats", payload: { containerId: serverData.containerId } }));
+      // send TID so node will stream stats for current container linked to that TID
+      nodeWs.send(JSON.stringify({ event: "stats", payload: { containerId: serverData.idt } }));
     });
 
     nodeWs.on("message", (msg) => {

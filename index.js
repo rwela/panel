@@ -5,7 +5,7 @@ const session = require("express-session");
 const config = require("./config.json");
 const unsqh = require("./modules/db.js");
 const DBStore = require("./modules/db-session.js");
-
+const Logger = require("./modules/logger.js");
 // --- WebSocket support ---
 const expressWs = require("express-ws");
 
@@ -92,7 +92,7 @@ async function getVersion() {
 async function startApp() {
   await getVersion();
   app.listen(PORT, () => {
-    console.log('\x1b[32m●\x1b[0m Talorix have started on the port ' + PORT);
+    Logger.success(`Talorix have started on the port ${PORT}`);
   });
 }
 

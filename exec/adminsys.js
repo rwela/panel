@@ -2,9 +2,9 @@
 const prompts = require("prompts");
 const crypto = require("crypto");
 const unsqh = require("../modules/db.js");
-
+const Logger = require("../modules/logger.js");
 (async () => {
-  console.log("=== Talorix Admin System ===\n");
+  Logger.log("=== Talorix Admin System ===\n");
 
   const response = await prompts({
     type: "select",
@@ -28,7 +28,7 @@ const unsqh = require("../modules/db.js");
       .list("users")
       .find((u) => u.email === userData.email);
     if (existing) {
-      console.log("Error: User with this email already exists.");
+      Logger.log("Error: User with this email already exists.");
       process.exit(1);
     }
 
@@ -47,7 +47,7 @@ const unsqh = require("../modules/db.js");
       admin: true,
     });
 
-    console.log(`Admin user created: ${userData.username} (${userData.email})`);
+    Logger.log(`Admin user created: ${userData.username} (${userData.email})`);
   } else if (response.action === "set") {
     const emailResponse = await prompts({
       type: "text",
@@ -59,12 +59,12 @@ const unsqh = require("../modules/db.js");
       .list("users")
       .find((u) => u.email === emailResponse.email);
     if (!user) {
-      console.log("Error: No user found with that email.");
+      Logger.log("Error: No user found with that email.");
       process.exit(1);
     }
 
     unsqh.put("users", user.id, { ...user, admin: true });
-    console.log(`User ${user.username} (${user.email}) is now an admin.`);
+    Logger.log(`User ${user.username} (${user.email}) is now an admin.`);
   } else if (response.action === "fetchImages") {
     const url =
       "https://raw.githubusercontent.com/Talorix/Container-Images/refs/heads/main/image_library.json";
@@ -120,17 +120,17 @@ const unsqh = require("../modules/db.js");
         addedImages.push(image);
       }
 
-      console.log(`Successfully added/updated ${addedImages.length} images.`);
+      Logger.log(`Successfully added/updated ${addedImages.length} images.`);
       addedImages.forEach((img) =>
-        console.log(`- ${img.name} (${img.dockerImage})`)
+        Logger.log(`- ${img.name} (${img.dockerImage})`)
       );
 
       if (skippedImages.length > 0) {
-        console.log(`Skipped ${skippedImages.length} identical images:`);
-        skippedImages.forEach((name) => console.log(`- ${name}`));
+        Logger.log(`Skipped ${skippedImages.length} identical images:`);
+        skippedImages.forEach((name) => Logger.log(`- ${name}`));
       }
     } catch (err) {
-      console.log("Error fetching images:", err.message);
+      Logger.log("Error fetching images:", err.message);
     }
   }
 
