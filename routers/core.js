@@ -99,6 +99,7 @@ router.post("/admin/node/create", requireAuth, requireAdmin, (req, res) => {
   });
 });
 
+
 /**
  * GET /admin/nodes
  * List all nodes
@@ -140,7 +141,7 @@ router.post(
     const panelUrl = `${req.protocol}://${req.get("host")}`;
 
     res.json({
-      command: `npm run configure --key ${node.key} --panel ${panelUrl}`,
+      command: `npm run configure -- --key ${node.key} --panel ${panelUrl} --port ${node.port}`,
     });
   }
 );
@@ -161,6 +162,27 @@ router.post("/admin/node/:id", requireAuth, requireAdmin, async (req, res) => {
   }
 
   res.json(node);
+});
+
+
+/**
+ * GET /admin/node/ver/:id
+ * Get the current node version
+ */
+router.get("/admin/node/ver/:id", requireAuth, requireAdmin, async (req, res) => {
+  const node = unsqh.get("nodes", req.params.id);
+  try {
+    const response = await fetch(
+      `http://${node.ip}:${node.port}/version?key=${node.key}`,
+      { timeout: 3000 }
+    );
+    if (!response.ok) throw new Error("Bad response");
+    const data = await response.json();
+    res.json({ version: data.version });
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ version: 'unknown' });
+  }
 });
 
 /**

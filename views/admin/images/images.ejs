@@ -41,56 +41,95 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <% images.forEach(img => { %>
-          <div onclick="window.location.href='/admin/image/<%= img.id %>'"
-            class="cursor-pointer bg-neutral-950 border border-neutral-800 rounded-2xl p-6 flex flex-col justify-between"
-          >
-            <div>
-              <h2 class="text-xl font-semibold mb-2"><%= img.name %></h2>
-              <p class="text-gray-400 text-sm mb-1">
-                <strong>Docker Image:</strong> <%= img.dockerImage %>
-              </p>
-              <p class="text-gray-400 text-sm mb-1"><%= img.description %></p>
-              <p class="text-gray-400 text-sm mb-1">
-                <strong>ENVs:</strong> <%= JSON.stringify(img.envs) %>
-              </p>
-              <% if (img.files.length) { %>
-              <p class="text-gray-400 text-sm"><strong>Files:</strong></p>
-              <ul class="list-disc list-inside text-gray-400 text-sm">
-                <% img.files.forEach(file => { %>
-                <li>
-                  <a
-                    href="<%= file.url %>"
-                    class="text-indigo-400 hover:underline"
-                    ><%= file.filename %></a
-                  >
-                </li>
-                <% }) %>
-              </ul>
+       <div class="bg-neutral-950 border border-neutral-900 rounded-lg overflow-hidden">
+  <table class="w-full table-auto text-left border-collapse">
+    <thead class="text-neutral-400 uppercase text-xs border-b border-neutral-800">
+      <tr>
+        <th class="px-4 py-2">Name</th>
+        <th class="px-4 py-2">Docker Image</th>
+        <!--th class="px-4 py-2">Description</th-->
+        <th class="px-4 py-2">ENVs</th>
+        <th class="px-4 py-2">Files</th>
+        <th class="px-4 py-2 text-right">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% if (images && images.length > 0) { %>
+        <% images.forEach(img => { %>
+          <tr onclick="window.location.href='/admin/image/<%= img.id %>'" class="cursor-pointer border-b border-neutral-800 hover:bg-neutral-900/50 transition-colors">
+
+            <!-- Name -->
+            <td class="px-4 py-3 font-semibold text-gray-100">
+              <%= img.name %>
+            </td>
+
+            <!-- Docker Image -->
+            <td class="px-4 py-3 text-gray-400">
+              <%= img.dockerImage %>
+            </td>
+
+            <!-- Description -->
+            <!--td class="px-4 py-3 text-gray-400">
+              <%= img.description %>
+            </td-->
+
+            <!-- ENVs -->
+            <td class="px-4 py-3 text-gray-400">
+              <%= JSON.stringify(img.envs) %>
+            </td>
+
+            <!-- Files -->
+            <td class="px-4 py-3 text-gray-400">
+              <% if (img.files.length > 0) { %>
+                <ul class="list-disc list-inside">
+                  <% img.files.forEach(file => { %>
+                    <li>
+                      <a href="<%= file.url %>" class="text-indigo-400 hover:underline">
+                        <%= file.filename %>
+                      </a>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } else { %>
+                <span class="text-neutral-500 italic">No files</span>
               <% } %>
-            </div>
-            <div class="mt-4 flex justify-end gap-2">
-              <!-- Delete Button -->
+            </td>
+
+            <!-- Actions -->
+            <td class="px-4 py-3 text-right flex justify-end gap-2">
+
+              <!-- Delete -->
               <button
                 onclick="deleteImage('<%= img.id %>')"
-                class="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-3 py-1 rounded-xl text-sm"
+                class="px-3 py-1 text-xs font-semibold rounded-lg bg-red-600 hover:bg-red-700"
               >
-                <i data-lucide="trash-2" class="w-4 h-4"></i> Delete
+                Delete
               </button>
 
-              <!-- Export Button -->
+              <!-- Export -->
               <a
                 href="/admin/images/export/<%= img.id %>"
                 target="_blank"
-                class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-xl text-sm"
+                class="px-3 py-1 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-700"
               >
-                <i data-lucide="download" class="w-4 h-4"></i> Export
+                Export
               </a>
-            </div>
-          </div>
-          <% }) %>
-        </div>
+
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" class="px-4 py-6 text-neutral-500 italic text-center">
+            No images found.
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
       </div>
     </main>
 

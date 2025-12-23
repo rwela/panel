@@ -12,30 +12,39 @@
 
   <!-- Navigation Links -->
   <nav class="flex-1 px-4 py-6 space-y-2">
-    <a href="/dashboard" class="flex items-center px-4 py-3 rounded-2xl hover:bg-neutral-900 border border-neutral-900 transition-colors">
+    <a href="/dashboard" class="w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-neutral-900 border border-neutral-900 relative">
       <svg class="w-5 h-5 mr-3 text-gray-300" data-lucide="layout-dashboard"></svg>
       Dashboard
     </a>
     <% if (user.admin) { %>
+<div class="pt-1">
+  <div class="flex items-center gap-3">
+    <div class="flex-1 border-t border-neutral-800"></div>
+    <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+      Admin
+    </span>
+    <div class="flex-1 border-t border-neutral-800"></div>
+  </div>
+</div>
     <div class="space-y-1">
-      <a href="/admin/settings" class="flex items-center px-4 py-3 rounded-2xl hover:bg-neutral-900 border border-neutral-900 transition-colors">
-        <svg class="w-5 h-5 mr-3 text-gray-300" data-lucide="sliders-horizontal"></svg>
-        Admin
+      <a href="/admin/settings" class="w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-neutral-900 border border-neutral-900 relative">
+        <svg class="w-5 h-5 mr-3 text-gray-300" data-lucide="settings"></svg>
+        Settings
       </a>
       <!-- Admin Sub-links -->
-      <a href="/admin/nodes" class="flex items-center px-6 py-2 rounded-2xl hover:bg-neutral-900 border border-neutral-900 transition-colors text-sm text-gray-400">
+      <a href="/admin/nodes" class="w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-neutral-900 border border-neutral-900 relative">
         <svg class="w-4 h-4 mr-2 text-gray-400" data-lucide="boxes"></svg>
         Nodes
       </a>
-      <a href="/admin/images" class="flex items-center px-6 py-2 rounded-2xl hover:bg-neutral-900 border border-neutral-900 transition-colors text-sm text-gray-400">
+      <a href="/admin/images" class="w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-neutral-900 border border-neutral-900 relative">
         <svg class="w-4 h-4 mr-2 text-gray-400" data-lucide="image"></svg>
         Images
       </a>
-      <a href="/admin/servers" class="flex items-center px-6 py-2 rounded-2xl hover:bg-neutral-900 border border-neutral-900 transition-colors text-sm text-gray-400">
+      <a href="/admin/servers" class="w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-neutral-900 border border-neutral-900 relative">
         <svg class="w-4 h-4 mr-2 text-gray-400" data-lucide="server"></svg>
         Servers
       </a>
-      <a href="/admin/users" class="flex items-center px-6 py-2 rounded-2xl hover:bg-neutral-900 border border-neutral-900 transition-colors text-sm text-gray-400">
+      <a href="/admin/users" class="w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-neutral-900 border border-neutral-900 relative">
         <svg class="w-4 h-4 mr-2 text-gray-400" data-lucide="users"></svg>
         Users
       </a>

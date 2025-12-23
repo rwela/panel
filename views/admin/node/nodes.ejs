@@ -69,77 +69,86 @@
             + Create Node
           </button>
         </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-  <% nodes.forEach(node => { %>
-    <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
+<div class="bg-neutral-950 border border-neutral-900 rounded-lg overflow-hidden">
+  <table class="w-full table-auto text-left border-collapse">
+    <thead class="text-neutral-400 uppercase text-xs border-b border-neutral-800">
+      <tr>
+        <th class="px-4 py-2">Name</th>
+        <th class="px-4 py-2">IP / Port</th>
+        <th class="px-4 py-2">CPU</th>
+        <th class="px-4 py-2">RAM</th>
+        <th class="px-4 py-2">Version</th> <!-- NEW -->
+        <th class="px-4 py-2 text-right">Status / Actions</th>
+      </tr>
+    </thead>
 
-      <!-- Top -->
-      <div class="flex justify-between items-center mb-4">
-        <div class="flex items-center gap-2">
-          <% if (node.status === "online") { %>
-            <i data-lucide="heart-pulse" class="w-5 h-5 text-green-400 heartbeat"></i>
-          <% } else if (node.status === "dockernotrunning") { %>
-            <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-400"></i>
-          <% } else { %>
-            <i data-lucide="x-circle" class="w-5 h-5 text-red-400"></i>
-          <% } %>
-          <span class="font-semibold text-gray-100"><%= node.name %></span>
-        </div>
-        <span class="text-gray-400 text-sm"><%= node.ip %>:<%= node.port %></span>
-      </div>
+    <tbody>
+      <% if (nodes && nodes.length > 0) { %>
+        <% nodes.forEach(node => { %>
+          <tr class="border-b border-neutral-800 hover:bg-neutral-900/50 transition-colors">
 
-      <!-- Specs -->
-      <div class="grid grid-cols-2 gap-4 mb-6 text-gray-400 text-sm">
-        <div>
-          <span class="font-medium text-gray-300">CPU:</span> <%= node.core %> Cores
-        </div>
-        <div>
-          <span class="font-medium text-gray-300">RAM:</span> <%= node.ram %> MB
-        </div>
-      </div>
+            <!-- Name -->
+            <td class="px-4 py-3 font-semibold text-gray-100 flex items-center gap-2">
+              <% if (node.status === "online") { %>
+                <i data-lucide="heart-pulse" class="w-5 h-5 text-green-400 heartbeat" data-node-id="<%= node.id %>" title="Loading version..."></i>
+              <% } else if (node.status === "dockernotrunning") { %>
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-400"></i>
+              <% } else { %>
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-400"></i>
+              <% } %>
+              <%= node.name %>
+            </td>
 
-      <!-- Actions -->
-      <div class="flex justify-end gap-2">
+            <!-- IP / Port -->
+            <td class="px-4 py-3 text-gray-400">
+              <%= node.ip %>:<%= node.port %>
+            </td>
 
-        <!-- Manage -->
-        <a
-          href="/admin/node/<%= node.id %>"
-          class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-xl text-sm transition"
-        >
-          <i data-lucide="settings" class="w-4 h-4"></i>
-          Manage
-        </a>
+            <!-- CPU -->
+            <td class="px-4 py-3 text-gray-400">
+              <%= node.core %> Cores
+            </td>
 
-        <!-- Edit -->
-        <a
-          href="/admin/node/<%= node.id %>/edit"
-          class="inline-flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 px-3 py-2 rounded-xl text-sm transition"
-        >
-          <i data-lucide="edit-3" class="w-4 h-4"></i>
-          Edit
-        </a>
+            <!-- RAM -->
+            <td class="px-4 py-3 text-gray-400">
+              <%= node.ram %> MB
+            </td>
 
-        <!-- Delete -->
-        <form
-          action="/admin/node/<%= node.id %>/delete"
-          method="post"
-          onsubmit="return confirm('Delete node \"<%= node.name %>\"? This cannot be undone.');"
-        >
-          <button
-            type="submit"
-            class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 px-3 py-2 rounded-xl text-sm transition"
-          >
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-            Delete
-          </button>
-        </form>
+            <!-- Version -->
+            <td class="px-4 py-3 text-gray-400">
+              <span class="node-version bg-neutral-950 border border-neutral-800 px-2 mb-2 font-mono rounded-md" data-node-id="<%= node.id %>">Loading...</span>
+            </td>
 
-      </div>
-    </div>
-  <% }) %>
+            <!-- Status / Actions -->
+            <td class="px-4 py-3 text-right flex justify-end gap-2">
+
+              <a href="/admin/node/<%= node.id %>" class="px-3 py-1 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700">
+                Manage
+              </a>
+
+              <a href="/admin/node/<%= node.id %>/edit" class="px-3 py-1 text-xs font-semibold rounded-lg bg-neutral-800 hover:bg-neutral-700">
+                Edit
+              </a>
+
+              <form action="/admin/node/<%= node.id %>/delete" method="post" onsubmit="return confirm('Delete node "<%= node.name %>"?');">
+                <button type="submit" class="px-3 py-1 text-xs font-semibold rounded-lg bg-red-600 hover:bg-red-700">
+                  Delete
+                </button>
+              </form>
+
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" class="px-4 py-6 text-neutral-500 italic text-center">
+            No nodes found.
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
 </div>
-
-
       </div>
     </main>
 <!-- Create Node Modal -->
@@ -205,6 +214,26 @@
         if (res.ok) location.reload();
         else alert("Failed to create node");
       }
+       document.querySelectorAll('.heartbeat').forEach(icon => {
+    const nodeId = icon.dataset.nodeId;
+    if (!nodeId) return;
+
+    fetch(`/admin/node/ver/${nodeId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.version) {
+          icon.title = `Version: ${data.version}`;
+          // also update the Version column
+          const versionEl = document.querySelector(`.node-version[data-node-id="${nodeId}"]`);
+          if (versionEl) versionEl.textContent = data.version;
+        } else {
+          icon.title = 'Version unknown';
+        }
+      })
+      .catch(() => {
+        icon.title = 'Version fetch failed';
+      });
+  });
     </script>
   </body>
 </html>

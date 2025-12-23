@@ -43,32 +43,9 @@ app.use(express.json());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
 app.use(express.static(path.join(__dirname, "public")));
-app.get("/spa.js", (req, res) => {
-  res.type("application/javascript").send(`
-    document.addEventListener('click', e => {
-      const link = e.target.closest('a');
-      if (!link || !link.href.startsWith(location.origin)) return;
-      e.preventDefault();
-      fetch(link.href).then(r => r.text()).then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const main = document.querySelector('#main');
-        const newMain = doc.querySelector('#main');
-        if (main && newMain) main.innerHTML = newMain.innerHTML;
-        history.pushState({}, '', link.href);
-      }).catch(()=> location.href = link.href);
-    });
-
-    window.addEventListener('popstate', () => {
-      fetch(location.href).then(r => r.text()).then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const main = document.querySelector('#main');
-        const newMain = doc.querySelector('#main');
-        if (main && newMain) main.innerHTML = newMain.innerHTML;
-      });
-    });
-  `);
+app.use((req, res, next) => {
+  res.locals.config = config;
+  next();
 });
 
 app.use((req, res, next) => {
