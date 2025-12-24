@@ -3,8 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <title><%= name %> - Settings</title>
-    <link rel="stylesheet" href="/assets/tailwind.css">
+    <link rel="stylesheet" href="/assets/tailwind.css" />
+
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
       .input {
         width: 100%;
@@ -14,34 +16,125 @@
         border-radius: 0.75rem;
         color: #f5f5f5;
       }
-      .btn {
-        @apply px-4 py-2 rounded-xl font-medium;
+      .tab-active {
+        background: #0a0a0a;
+        border-color: #262626;
+        color: #fff;
+      }
+      /* a little visual emphasis for large action buttons */
+      .big-btn {
+        @apply inline-flex items-center justify-center gap-3 px-6 py-3 rounded-2xl font-semibold text-lg;
       }
     </style>
   </head>
+
   <body class="min-h-screen flex">
     <%- include('../components/sidebar', { name, user }) %>
 
     <main class="flex-1 p-8 overflow-auto">
       <div class="max-w-4xl mx-auto space-y-6">
-        <div
-          class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl flex justify-between items-center"
-        >
-        <div>
-  <h1 class="text-3xl font-bold flex items-center gap-2">
-    <i data-lucide="settings" class="w-6 h-6"></i> Settings
-  </h1>
-  <p class="text-gray-400">Update application settings</p>
-</div>
-
+        <!-- Header -->
+        <div class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl">
+          <h1 class="text-3xl font-bold flex items-center gap-2">
+            <i data-lucide="user" class="w-6 h-6"></i> Settings
+          </h1>
+          <p class="text-gray-400">Manage your application</p>
         </div>
 
-        <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6">
+        <!-- Tabs -->
+        <div class="flex gap-2 border-b border-neutral-800">
+          <button
+            class="tab-btn px-4 py-2 rounded-t-xl border border-b-0 border-neutral-800 tab-active"
+            data-tab="overview"
+          >
+            Overview
+          </button>
+          <button
+            class="tab-btn px-4 py-2 rounded-t-xl border border-b-0 border-neutral-800 text-gray-400"
+            data-tab="settings"
+          >
+            Settings
+          </button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div
+          id="overview"
+          class="tab-content bg-neutral-950 border border-neutral-800 rounded-b-2xl p-6 space-y-6"
+        >
+          <!-- Version banner (hidden by default) -->
+          <div
+            id="versionBanner"
+            class="hidden rounded-lg p-3 text-white bg-red-700 flex items-center gap-3"
+          >
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            <div>
+              <div id="versionBannerText" class="font-medium">
+                Your instance is not running the latest version.
+              </div>
+              <div class="text-sm text-red-100" id="versionBannerSub">
+                Current: <span id="curVerInline"></span> • Latest:
+                <span id="latestVerInline"></span>
+              </div>
+            </div>
+          </div>
+
+          <img
+            src="https://talorix.io/talorix-banner.png"
+            alt="Talorix Banner"
+            class="rounded-xl border border-neutral-800"
+          />
+
+          <div class="space-y-3">
+            <a
+              href="https://talorix.io"
+              target="_blank"
+              class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-neutral-900 border border-neutral-800 relative transition"
+            >
+              <i data-lucide="globe" class="w-5 h-5 text-emerald-400"></i>
+              <div>
+                <div class="font-medium">Website</div>
+                <div class="text-sm text-gray-400">https://talorix.io</div>
+              </div>
+            </a>
+
+            <a
+              href="https://discord.gg/kqvyDk5BKR"
+              target="_blank"
+              class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-neutral-900 border border-neutral-800 relative transition"
+            >
+              <i
+                data-lucide="messages-square"
+                class="w-5 h-5 text-indigo-400"
+              ></i>
+              <div>
+                <div class="font-medium">Discord</div>
+                <div class="text-sm text-gray-400">Join the community</div>
+              </div>
+            </a>
+          </div>
+
+          <div class="text-gray-400">
+            Version:
+            <span id="version" class="text-gray-100 font-medium mr-3"
+              >Loading...</span
+            >
+            <span class="text-sm text-gray-500"
+              >(<span id="latestLabel">checking latest…</span>)</span
+            >
+          </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div
+          id="settings"
+          class="tab-content hidden bg-neutral-950 border border-neutral-800 rounded-b-2xl p-6"
+        >
           <form id="settingsForm" class="space-y-4">
             <div>
-              <label for="name" class="block text-gray-400 mb-1"
-                >Application Name</label
-              >
+              <label for="name" class="block text-gray-400 mb-1">
+                Application Name
+              </label>
               <input
                 id="name"
                 name="name"
@@ -49,6 +142,7 @@
                 class="input"
               />
             </div>
+
             <button
               type="submit"
               class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl font-medium text-white"
@@ -63,8 +157,97 @@
     </main>
 
     <script>
-      lucide.createIcons();
+      /* Tabs */
+      const tabs = document.querySelectorAll(".tab-btn");
+      const contents = document.querySelectorAll(".tab-content");
 
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((t) =>
+            t.classList.remove("tab-active", "text-gray-100")
+          );
+          contents.forEach((c) => c.classList.add("hidden"));
+
+          tab.classList.add("tab-active");
+          document.getElementById(tab.dataset.tab).classList.remove("hidden");
+        });
+      });
+
+      /* Helper: semver-like comparison (handles v prefix and different segment lengths) */
+      function normalize(v) {
+        if (!v && v !== 0) return [];
+        // remove a leading "v" or non-digit characters at start
+        v = String(v)
+          .trim()
+          .replace(/^[^0-9]*/, "");
+        return v.split(".").map((s) => {
+          // remove any non-digit suffix (e.g. "1.2.3-beta")
+          const m = s.match(/^(\d+)/);
+          return m ? parseInt(m[1], 10) : 0;
+        });
+      }
+      function compareVersions(a, b) {
+        const A = normalize(a);
+        const B = normalize(b);
+        const len = Math.max(A.length, B.length);
+        for (let i = 0; i < len; i++) {
+          const av = A[i] || 0;
+          const bv = B[i] || 0;
+          if (av > bv) return 1;
+          if (av < bv) return -1;
+        }
+        return 0;
+      }
+
+      const currentVersion = <%- JSON.stringify(config.version) %>;
+
+      /* Fetch Latest Version and update UI + banner if needed */
+      (async () => {
+        const versionEl = document.getElementById("version");
+        const latestLabel = document.getElementById("latestLabel");
+        const banner = document.getElementById("versionBanner");
+        const bannerText = document.getElementById("versionBannerText");
+        const curVerInline = document.getElementById("curVerInline");
+        const latestVerInline = document.getElementById("latestVerInline");
+
+        // show current version from server immediately
+        versionEl.textContent = currentVersion || "Unknown";
+        curVerInline.textContent = currentVersion || "Unknown";
+
+        try {
+          const res = await fetch(
+            "https://ma4z.is-a.dev/repo/version_library.json"
+          );
+          const data = await res.json();
+          const latest = data?.["hydren:sr"]?.["talorix"]?.["panel"];
+          if (!latest) {
+            latestLabel.textContent = "unknown";
+            latestVerInline.textContent = "unknown";
+            return;
+          }
+          latestLabel.textContent = "latest: " + latest;
+          latestVerInline.textContent = latest;
+          // compare
+          const cmp = compareVersions(latest, currentVersion);
+          if (cmp > 0) {
+            // latest is greater than current -> show red banner
+            bannerText.textContent =
+              "Update available — you are not running the latest version.";
+            banner.classList.remove("hidden");
+          } else {
+            // up-to-date
+            banner.classList.add("hidden");
+          }
+        } catch (err) {
+          latestLabel.textContent = "unknown";
+          latestVerInline.textContent = "unknown";
+          // keep banner hidden on fetch error
+          banner.classList.add("hidden");
+          console.error("Failed to fetch version info:", err);
+        }
+      })();
+
+      /* Settings Form (unchanged) */
       const form = document.getElementById("settingsForm");
       const msg = document.getElementById("msg");
 
@@ -84,19 +267,20 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name }),
           });
+
           const data = await res.json();
-          if (data.success) {
-            msg.textContent = "Settings saved successfully!";
-            msg.className = "text-emerald-500 mt-2";
-          } else {
-            msg.textContent = data.error || "Error saving settings";
-            msg.className = "text-red-500 mt-2";
-          }
+          msg.textContent = data.success
+            ? "Settings saved successfully!"
+            : data.error || "Error saving settings";
+          msg.className = data.success
+            ? "text-emerald-500 mt-2"
+            : "text-red-500 mt-2";
         } catch (err) {
           msg.textContent = err.message;
           msg.className = "text-red-500 mt-2";
         }
       });
+      lucide.createIcons();
     </script>
   </body>
 </html>
