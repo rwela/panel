@@ -117,7 +117,6 @@
     </div>
   </div>
 </aside>
-<% if (typeof server !== 'undefined') { %>
 <script>
   const isServerPage = window.location.pathname.startsWith('/server/');
   const mainNav = document.getElementById('mainSidebarNav');
@@ -127,7 +126,6 @@
     mainNav.classList.add('hidden');
   }
   </script>
-<% } %>
   <script>
   lucide.createIcons();
 
