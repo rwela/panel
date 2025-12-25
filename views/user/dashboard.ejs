@@ -120,7 +120,11 @@
 
   // Increment uptime locally every second
   setInterval(() => {
+  if (statusEl.textContent.includes("Online")) {
     uptimeSeconds++;
+  } else {
+    uptimeSeconds = 0;
+  }
     uptimeEl.textContent = formatUptime(uptimeSeconds);
   }, 1000);
 })();

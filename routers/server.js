@@ -492,6 +492,7 @@ router.get("/server/settings/:id", requireAuth, withServer, (req, res) => {
     name: appName,
     user,
     server,
+    req
   });
 });
 

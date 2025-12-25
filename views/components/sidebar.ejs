@@ -11,7 +11,7 @@
   </div>
 
 <!-- Navigation Links -->
-<nav class="flex-1 px-4 py-6 space-y-1">
+<nav id="mainSidebarNav" class="flex-1 px-4 py-6 space-y-1">
 
   <!-- Dashboard Link -->
   <a href="/dashboard" class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
@@ -57,6 +57,43 @@
   <% } %>
 
 </nav>
+<% if (typeof server !== 'undefined') { %>
+<nav id="serverSidebarNav" class="hidden flex-1 px-4 py-6 space-y-1">
+
+  <a href="/dashboard"
+     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+    Back to Dashboard
+  </a>
+
+  <div class="mt-4 border-t border-neutral-800"></div>
+
+  <a href="/server/manage/<%= server.id %>"
+     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+    <i data-lucide="square-terminal" class="w-4 h-4"></i>
+    Console
+  </a>
+
+  <a href="/server/files/<%= server.id %>"
+     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+    <i data-lucide="folder-open" class="w-4 h-4"></i>
+    Files
+  </a>
+
+  <a href="/server/network/<%= server.id %>"
+     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+    <i data-lucide="network" class="w-4 h-4"></i>
+    Network
+  </a>
+
+  <a href="/server/settings/<%= server.id %>"
+     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+    <i data-lucide="cog" class="w-4 h-4"></i>
+    Settings
+  </a>
+
+</nav>
+<% } %>
 
   <!-- User Box at Bottom -->
   <div class="px-4 py-6 border-t border-neutral-800">
@@ -79,14 +116,21 @@
       </div>
     </div>
   </div>
-
 </aside>
-
+<% if (typeof server !== 'undefined') { %>
 <script>
-  // Initialize Lucide icons
-  if (typeof lucide !== 'undefined') lucide.createIcons();
+  const isServerPage = window.location.pathname.startsWith('/server/');
+  const mainNav = document.getElementById('mainSidebarNav');
+  const serverNav = document.getElementById('serverSidebarNav');
 
-  // Toggle animated dropdown
+  if (isServerPage && serverNav) {
+    mainNav.classList.add('hidden');
+  }
+  </script>
+<% } %>
+  <script>
+  lucide.createIcons();
+
   const userButton = document.getElementById('userButton');
   const userDropdown = document.getElementById('userDropdown');
 
