@@ -118,7 +118,7 @@
         if (a.allocationOwnedto?.serverId) return;
         const option = document.createElement("option");
         option.value = a.id;
-        option.textContent = `${a.ip}:${a.port} (${a.type || "primary"})`;
+        option.textContent = `${a.ip}:${a.port}`;
         allocSelect.appendChild(option);
       });
     }

@@ -113,7 +113,69 @@
       <% } %>
     </tbody>
   </table>
+  <div class="flex items-center justify-between px-4 py-3 text-sm text-gray-400 border-t border-neutral-900">
+  <span id="serversPaginationInfo"></span>
+
+  <div class="flex gap-2">
+    <button
+      id="serversPrevPage"
+      class="px-3 py-1 rounded-xl bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50"
+    >
+      Prev
+    </button>
+
+    <button
+      id="serversNextPage"
+      class="px-3 py-1 rounded-xl bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
 </div>
+
+</div>
+<script>
+  const serversRowsPerPage = 8;
+  const serversTableBody = document.querySelector("table tbody");
+  const serversRows = Array.from(serversTableBody.querySelectorAll("tr"))
+    .filter(row => !row.textContent.includes("No servers found"));
+
+  let serversCurrentPage = 1;
+  const serversTotalPages = Math.ceil(serversRows.length / serversRowsPerPage);
+
+  const serversInfo = document.getElementById("serversPaginationInfo");
+  const serversPrev = document.getElementById("serversPrevPage");
+  const serversNext = document.getElementById("serversNextPage");
+
+  function renderServersPage() {
+    const start = (serversCurrentPage - 1) * serversRowsPerPage;
+    const end = start + serversRowsPerPage;
+
+    serversRows.forEach((row, index) => {
+      row.style.display = index >= start && index < end ? "" : "none";
+    });
+
+    serversInfo.textContent = `Page ${serversCurrentPage} of ${serversTotalPages || 1}`;
+    serversPrev.disabled = serversCurrentPage === 1;
+    serversNext.disabled = serversCurrentPage === serversTotalPages;
+  }
+
+  serversPrev.onclick = () => {
+    if (serversCurrentPage > 1) {
+      serversCurrentPage--;
+      renderServersPage();
+    }
+  };
+
+  serversNext.onclick = () => {
+    if (serversCurrentPage < serversTotalPages) {
+      serversCurrentPage++;
+      renderServersPage();
+    }
+  };
+
+  renderServersPage();
+</script>
 
 
       </div>

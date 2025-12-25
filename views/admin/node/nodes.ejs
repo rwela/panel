@@ -75,9 +75,9 @@
       <tr>
         <th class="px-4 py-2">Name</th>
         <th class="px-4 py-2">IP / Port</th>
-        <th class="px-4 py-2">CPU</th>
+        <th class="px-4 py-2">Cores</th>
         <th class="px-4 py-2">RAM</th>
-        <th class="px-4 py-2">Version</th> <!-- NEW -->
+        <th class="px-4 py-2">Version</th> 
         <th class="px-4 py-2 text-right">Status / Actions</th>
       </tr>
     </thead>
@@ -106,7 +106,7 @@
 
             <!-- CPU -->
             <td class="px-4 py-3 text-gray-400">
-              <%= node.core %> Cores
+              <%= node.core %>
             </td>
 
             <!-- RAM -->
@@ -148,6 +148,68 @@
       <% } %>
     </tbody>
   </table>
+  <div class="flex items-center justify-between px-4 py-3 text-sm text-gray-400 border-t border-neutral-900">
+  <span id="nodesPaginationInfo"></span>
+
+  <div class="flex gap-2">
+    <button
+      id="nodesPrevPage"
+      class="px-3 py-1 rounded-xl bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50"
+    >
+      Prev
+    </button>
+
+    <button
+      id="nodesNextPage"
+      class="px-3 py-1 rounded-xl bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
+</div>
+<script>
+  const nodesRowsPerPage = 5;
+  const nodesTableBody = document.querySelector("table tbody");
+  const nodesRows = Array.from(nodesTableBody.querySelectorAll("tr"))
+    .filter(row => !row.textContent.includes("No nodes found"));
+
+  let nodesCurrentPage = 1;
+  const nodesTotalPages = Math.ceil(nodesRows.length / nodesRowsPerPage);
+
+  const nodesInfo = document.getElementById("nodesPaginationInfo");
+  const nodesPrev = document.getElementById("nodesPrevPage");
+  const nodesNext = document.getElementById("nodesNextPage");
+
+  function renderNodesPage() {
+    const start = (nodesCurrentPage - 1) * nodesRowsPerPage;
+    const end = start + nodesRowsPerPage;
+
+    nodesRows.forEach((row, index) => {
+      row.style.display = index >= start && index < end ? "" : "none";
+    });
+
+    nodesInfo.textContent = `Page ${nodesCurrentPage} of ${nodesTotalPages || 1}`;
+    nodesPrev.disabled = nodesCurrentPage === 1;
+    nodesNext.disabled = nodesCurrentPage === nodesTotalPages;
+  }
+
+  nodesPrev.onclick = () => {
+    if (nodesCurrentPage > 1) {
+      nodesCurrentPage--;
+      renderNodesPage();
+    }
+  };
+
+  nodesNext.onclick = () => {
+    if (nodesCurrentPage < nodesTotalPages) {
+      nodesCurrentPage++;
+      renderNodesPage();
+    }
+  };
+
+  renderNodesPage();
+</script>
+
 </div>
       </div>
     </main>
@@ -159,8 +221,6 @@
       <input id="n-name" placeholder="Node Name" class="input w-full" />
       <input id="n-ip" placeholder="IP (or localhost)" class="input w-full" />
       <input id="n-port" placeholder="Port" class="input w-full" />
-      <input id="n-ram" placeholder="RAM (MB)" class="input w-full" />
-      <input id="n-core" placeholder="CPU Cores" class="input w-full" />
     </div>
     <div class="flex justify-end gap-3 mt-8">
       <button onclick="closeCreateModal()" class="px-5 py-2 bg-red-600 text-white transition rounded-lg hover:bg-red-700">Cancel</button>
@@ -201,8 +261,6 @@
           name: document.getElementById("n-name").value,
           ip: document.getElementById("n-ip").value,
           port: document.getElementById("n-port").value,
-          ram: document.getElementById("n-ram").value,
-          core: document.getElementById("n-core").value,
         };
 
         const res = await fetch("/admin/node/create", {
@@ -223,7 +281,6 @@
       .then(data => {
         if (data.version) {
           icon.title = `Version: ${data.version}`;
-          // also update the Version column
           const versionEl = document.querySelector(`.node-version[data-node-id="${nodeId}"]`);
           if (versionEl) versionEl.textContent = data.version;
         } else {

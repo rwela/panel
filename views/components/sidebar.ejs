@@ -62,7 +62,7 @@
   <div class="px-4 py-6 border-t border-neutral-800">
     <div class="relative">
       <!-- User Button with Avatar -->
-      <button id="userButton" class="w-full text-left px-4 py-3 bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 rounded-xl-2xl flex items-center transition-colors">
+      <button id="userButton" class="w-full text-left px-4 py-3 bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 rounded-xl flex items-center transition-colors">
         <img src="https://api.dicebear.com/9.x/pixel-art/svg?seed=<%= user.username %>" alt="Avatar" class="w-10 h-10 rounded-xl-full mr-3"/>
         <div class="flex flex-col">
           <span class="font-semibold"><%= user.username %></span>
@@ -71,8 +71,8 @@
       </button>
 
       <!-- Animated Dropdown -->
-      <div id="userDropdown" class="absolute left-0 bottom-full mb-2 w-full bg-neutral-950 border border-neutral-800 rounded-xl-xl shadow-lg transform scale-95 opacity-0 origin-bottom transition-all duration-200 pointer-events-none flex-col z-50">
-        <button onclick="window.location.href='/settings'" class="cursor-pointer w-full text-left px-4 py-2 hover:bg-neutral-900 transition-colors">Settings</button>
+      <div id="userDropdown" class="absolute left-0 bottom-full mb-2 w-full bg-neutral-950 border border-neutral-800 rounded-xl shadow-lg transform scale-95 opacity-0 origin-bottom transition-all duration-200 pointer-events-none flex-col z-50">
+        <button onclick="window.location.href='/settings'" class="cursor-pointer w-full text-left px-4 py-2 hover:bg-neutral-900 rounded-xl transition-colors">Settings</button>
         <form id="logoutFormSidebar" method="POST">
           <button type="submit" class="w-full text-left px-4 py-2 hover:bg-neutral-900 transition-colors text-red-500">Logout</button>
         </form>

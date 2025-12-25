@@ -66,12 +66,12 @@ router.get("/dashboard", requireAuth, (req, res) => {
 
 /**
  * POST /admin/node/create
- * body: { name, ram, core, ip, port }
+ * body: { name, ip, port }
  */
 router.post("/admin/node/create", requireAuth, requireAdmin, (req, res) => {
-  const { name, ram, core, ip, port } = req.body;
+  const { name, ip, port } = req.body;
 
-  if (!name || !ram || !core || !ip || !port) {
+  if (!name || !ip || !port) {
     return res.status(400).json({ error: "Missing fields" });
   }
 
@@ -80,8 +80,8 @@ router.post("/admin/node/create", requireAuth, requireAdmin, (req, res) => {
 
   const node = {
     name,
-    ram,
-    core,
+    ram: 'unknown',
+    core: 'unknown',
     ip,
     port,
     key,
@@ -200,6 +200,30 @@ router.get("/admin/node/:id", requireAuth, requireAdmin, async (req, res) => {
     node.status = status;
   }
 
+  const response = await fetch(
+    `http://${node.ip}:${node.port}/stats?key=${node.key}`
+  );
+
+  let data = {};
+  if (response.ok) {
+    data = await response.json();
+  }
+
+  const stats = data.stats;
+
+  if (stats?.totalCpuCores && stats?.totalRamGB) {
+    const totalRamGB = Number(stats.totalRamGB); 
+    const ramMB = Math.round(totalRamGB * 1024);
+
+    unsqh.update("nodes", req.params.id, {
+      ram: ramMB,
+      core: stats.totalCpuCores,
+    });
+
+    node.ram = ramMB;
+    node.core = stats.totalCpuCores;
+  }
+
   const settings = unsqh.get("settings", "app") || {};
   const appName = settings.name || "App";
   const user = unsqh.get("users", req.session.userId);
@@ -306,7 +330,7 @@ router.post(
       unsqh.delete("nodes", req.params.id);
     } catch (err) {
       console.error("Failed to delete node from store:", err?.message || err);
-      return res.redirect('/admin/nodes?success=false&err='+ err.message);
+      return res.redirect('/admin/nodes?success=false&err=' + err.message);
     }
 
     res.redirect('/admin/nodes?success=true');
@@ -483,7 +507,6 @@ router.get(
       const data = await response.json();
       res.json({ stats: data.stats });
     } catch (err) {
-      console.error("Failed to fetch node stats:", err);
       res.status(500).json({ error: "Failed to fetch node stats" });
     }
   }
@@ -503,8 +526,8 @@ router.get(
 
     const status = await checkNodeHealth(node);
     if (node.status !== status) {
-         unsqh.update("nodes", req.params.id, { status });
-         node.status = status;
+      unsqh.update("nodes", req.params.id, { status });
+      node.status = status;
     }
 
     const settings = unsqh.get("settings", "app") || {};
@@ -1108,7 +1131,7 @@ router.post(
       ram,
       core,
       disk,
-    //  port,
+      //  port,
       env: newEnv = {},
       files: newFiles = [],
       imageId,

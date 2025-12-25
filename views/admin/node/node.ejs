@@ -7,6 +7,13 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+<style>
+    .tab-active {
+        background: #0a0a0a;
+        border-color: #262626;
+        color: #fff;
+      }
+</style>
 <body class="min-h-screen flex">
 
   <%- include('../../components/sidebar', { name, user }) %>
@@ -37,18 +44,27 @@
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="flex space-x-4 border-b border-neutral-800">
-        <button id="tab-stats" class="pb-2 border-b-2 border-indigo-600 font-semibold">Stats</button>
-        <button id="tab-allocations" class="pb-2 text-gray-400 hover:text-gray-100">Allocations</button>
-      </div>
-
+   <!-- Tabs -->
+        <div class="flex gap-2 border-b border-neutral-800">
+          <button
+            class="tab-btn px-4 py-2 rounded-t-xl border border-b-0 border-neutral-800 tab-active"
+            id="tab-stats"
+          >
+            Stats
+          </button>
+          <button
+            class="tab-btn px-4 py-2 rounded-t-xl border border-b-0 border-neutral-800 text-gray-400"
+            id="tab-allocations"
+          >
+            Allocations
+          </button>
+        </div>
       <!-- Tab Content -->
       <div id="tabContent">
 
         <!-- Stats Content -->
         <div id="content-stats" class="space-y-6">
-          <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-6">
+          <div class="bg-neutral-950 border border-neutral-800 p-6 space-y-6">
 <div class="pt-4">
   <div class="text-2xl font-semibold text-gray-100 mb-3">System Information</div>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -167,6 +183,67 @@
 <% } %>
       </tbody>
     </table>
+    <div class="flex items-center justify-between mt-3 text-sm text-gray-300">
+  <span id="paginationInfo"></span>
+
+  <div class="flex gap-2">
+    <button
+      id="prevPage"
+      class="px-3 py-1 rounded-xl bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50"
+    >
+      Prev
+    </button>
+
+    <button
+      id="nextPage"
+      class="px-3 py-1 rounded-xl bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
+</div>
+<script>
+  const rowsPerPage = 10;
+  const tableBody = document.getElementById("allocationsTableBody");
+  const rows = Array.from(tableBody.querySelectorAll("tr"));
+
+  let currentPage = 1;
+  const totalPages = Math.ceil(rows.length / rowsPerPage);
+
+  const paginationInfo = document.getElementById("paginationInfo");
+  const prevBtn = document.getElementById("prevPage");
+  const nextBtn = document.getElementById("nextPage");
+
+  function renderPage() {
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    rows.forEach((row, index) => {
+      row.style.display = index >= start && index < end ? "" : "none";
+    });
+
+    paginationInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+  }
+
+  prevBtn.onclick = () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderPage();
+    }
+  };
+
+  nextBtn.onclick = () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderPage();
+    }
+  };
+
+  renderPage();
+</script>
+
   </div>
 </div>
 
@@ -277,6 +354,8 @@
       tabStats.classList.add("border-indigo-600", "font-semibold");
       tabAlloc.classList.remove("border-indigo-600", "font-semibold");
       tabAlloc.classList.add("text-gray-400");
+      tabStats.classList.add("tab-active");
+      tabAlloc.classList.remove("tab-active");
     });
 
     tabAlloc.addEventListener("click", () => {
@@ -284,7 +363,8 @@
       contentStats.classList.add("hidden");
       tabAlloc.classList.add("border-indigo-600", "font-semibold");
       tabStats.classList.remove("border-indigo-600", "font-semibold");
-      tabStats.classList.add("text-gray-400");
+      tabStats.classList.remove("tab-active");
+      tabAlloc.classList.add("tab-active");
     });
 
     // Configure Node
