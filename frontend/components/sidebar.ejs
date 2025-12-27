@@ -1,122 +1,143 @@
- <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Figtree', sans-serif; }
-  </style>
-
-<aside class="w-64 bg-neutral-950 border-r border-neutral-800 flex flex-col justify-between h-screen">
+<!-- Figtree font -->
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Sidebar (only theme changed: gradient bg-neutral-950 -> neutral-800, text-gray-100) -->
+<aside
+  class="w-64 bg-neutral-950 border-r border-neutral-800 flex flex-col justify-between h-screen text-gray-100">
 
   <!-- Top App Name -->
   <div class="px-4 py-6 text-center border-b border-neutral-800">
-    <h1 class="text-2xl font-bold text-gray-100"><%= name %></h1>
+    <h1 class="text-2xl font-bold text-gray-100">
+      <%= name %>
+    </h1>
   </div>
 
-<!-- Navigation Links -->
-<nav id="mainSidebarNav" class="flex-1 px-4 py-6 space-y-1">
-
-  <!-- Dashboard Link -->
-  <a href="/dashboard" class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
-    <svg class="w-5 h-5 text-gray-300" data-lucide="layout-dashboard"></svg>
-    Dashboard
-  </a>
-
-  <% if (user.admin) { %>
-  <!-- Admin Section Divider -->
-  <div class="pt-2">
-    <div class="flex items-center gap-2">
-      <div class="flex-1 border-t border-neutral-800"></div>
-      <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">
-        Admin
-      </span>
-      <div class="flex-1 border-t border-neutral-800"></div>
-    </div>
-  </div>
-
-  <!-- Admin Links -->
-  <div class="space-y-1 mt-2">
-    <a href="/admin/settings" class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
-      <svg class="w-5 h-5 text-gray-300" data-lucide="settings"></svg>
-      Settings
+  <!-- Navigation Links -->
+  <nav id="mainSidebarNav" class="flex-1 px-4 py-6 space-y-1">
+    <!-- Dashboard Link -->
+    <a href="/dashboard"
+      class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
+      <svg class="w-5 h-5 text-gray-300" data-lucide="layout-dashboard"></svg>
+      Dashboard
     </a>
-    <a href="/admin/nodes" class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
-      <svg class="w-4 h-4 text-gray-400" data-lucide="boxes"></svg>
-      Nodes
-    </a>
-    <a href="/admin/images" class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
-      <svg class="w-4 h-4 text-gray-400" data-lucide="image"></svg>
-      Images
-    </a>
-    <a href="/admin/servers" class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
-      <svg class="w-4 h-4 text-gray-400" data-lucide="server"></svg>
-      Servers
-    </a>
-    <a href="/admin/users" class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
-      <svg class="w-4 h-4 text-gray-400" data-lucide="users"></svg>
-      Users
-    </a>
-  </div>
-  <% } %>
 
-</nav>
-<% if (typeof server !== 'undefined') { %>
-<nav id="serverSidebarNav" class="hidden flex-1 px-4 py-6 space-y-1">
-
-  <a href="/dashboard"
-     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
-    <i data-lucide="arrow-left" class="w-4 h-4"></i>
-    Back to Dashboard
-  </a>
-
-  <div class="mt-4 border-t border-neutral-800"></div>
-
-  <a href="/server/manage/<%= server.id %>"
-     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
-    <i data-lucide="square-terminal" class="w-4 h-4"></i>
-    Console
-  </a>
-
-  <a href="/server/files/<%= server.id %>"
-     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
-    <i data-lucide="folder-open" class="w-4 h-4"></i>
-    Files
-  </a>
-
-  <a href="/server/network/<%= server.id %>"
-     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
-    <i data-lucide="network" class="w-4 h-4"></i>
-    Network
-  </a>
-
-  <a href="/server/settings/<%= server.id %>"
-     class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
-    <i data-lucide="cog" class="w-4 h-4"></i>
-    Settings
-  </a>
-
-</nav>
-<% } %>
-
-  <!-- User Box at Bottom -->
-  <div class="px-4 py-6 border-t border-neutral-800">
-    <div class="relative">
-      <!-- User Button with Avatar -->
-      <button id="userButton" class="w-full text-left px-4 py-3 bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 rounded-xl flex items-center transition-colors">
-        <img src="https://api.dicebear.com/9.x/pixel-art/svg?seed=<%= user.username %>" alt="Avatar" class="w-10 h-10 rounded-xl-full mr-3"/>
-        <div class="flex flex-col">
-          <span class="font-semibold"><%= user.username %></span>
-          <span class="text-xs text-gray-400"><%= user.email %></span>
+    <% if (user.admin) { %>
+      <!-- Admin Section Divider -->
+      <div class="pt-2">
+        <div class="flex items-center gap-2">
+          <div class="flex-1 border-t border-neutral-800"></div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            Admin
+          </span>
+          <div class="flex-1 border-t border-neutral-800"></div>
         </div>
-      </button>
-
-      <!-- Animated Dropdown -->
-      <div id="userDropdown" class="absolute left-0 bottom-full mb-2 w-full bg-neutral-950 border border-neutral-800 rounded-xl shadow-lg transform scale-95 opacity-0 origin-bottom transition-all duration-200 pointer-events-none flex-col z-50">
-        <button onclick="window.location.href='/settings'" class="cursor-pointer w-full text-left px-4 py-2 hover:bg-neutral-900 rounded-xl transition-colors">Settings</button>
-        <form id="logoutFormSidebar" method="POST">
-          <button type="submit" class="w-full text-left px-4 py-2 hover:bg-neutral-900 transition-colors text-red-500">Logout</button>
-        </form>
       </div>
-    </div>
-  </div>
+
+      <!-- Admin Links -->
+      <div class="space-y-1 mt-2">
+        <a href="/admin/settings"
+          class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
+          <svg class="w-5 h-5 text-gray-300" data-lucide="settings"></svg>
+          Settings
+        </a>
+        <a href="/admin/nodes"
+          class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
+          <svg class="w-4 h-4 text-gray-300" data-lucide="boxes"></svg>
+          Nodes
+        </a>
+        <a href="/admin/images"
+          class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
+          <svg class="w-4 h-4 text-gray-300" data-lucide="image"></svg>
+          Images
+        </a>
+        <a href="/admin/servers"
+          class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
+          <svg class="w-4 h-4 text-gray-300" data-lucide="server"></svg>
+          Servers
+        </a>
+        <a href="/admin/users"
+          class="w-full text-left flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-neutral-900 transition-colors">
+          <svg class="w-4 h-4 text-gray-300" data-lucide="users"></svg>
+          Users
+        </a>
+      </div>
+      <% } %>
+
+  </nav>
+  <% if (typeof server !=='undefined' ) { %>
+    <nav id="serverSidebarNav" class="hidden flex-1 px-4 py-6 space-y-1">
+
+      <a href="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Back to Dashboard
+      </a>
+
+        <div class="flex items-center gap-2">
+          <div class="flex-1 border-t border-neutral-800"></div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            SERVER
+          </span>
+          <div class="flex-1 border-t border-neutral-800"></div>
+        </div>
+
+      <a href="/server/manage/<%= server.id %>"
+        class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+        <i data-lucide="square-terminal" class="w-4 h-4"></i>
+        Console
+      </a>
+
+      <a href="/server/files/<%= server.id %>"
+        class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+        <i data-lucide="folder-open" class="w-4 h-4"></i>
+        Files
+      </a>
+
+      <a href="/server/network/<%= server.id %>"
+        class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+        <i data-lucide="network" class="w-4 h-4"></i>
+        Network
+      </a>
+
+      <a href="/server/settings/<%= server.id %>"
+        class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition">
+        <i data-lucide="cog" class="w-4 h-4"></i>
+        Settings
+      </a>
+
+    </nav>
+    <% } %>
+
+      <!-- User Box at Bottom -->
+      <div class="px-4 py-6 border-t border-neutral-800">
+        <div class="relative">
+          <!-- User Button with Avatar -->
+          <button id="userButton"
+            class="w-full text-left px-4 py-3 bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 rounded-xl flex items-center transition-colors">
+            <img src="https://api.dicebear.com/9.x/pixel-art/svg?seed=<%= user.username %>" alt="Avatar"
+              class="w-10 h-10 rounded-xl-full mr-3" />
+            <div class="flex flex-col">
+              <span class="font-semibold">
+                <%= user.username %>
+              </span>
+              <span class="text-xs text-gray-400">
+                <%= user.email %>
+              </span>
+            </div>
+          </button>
+
+          <!-- Animated Dropdown -->
+          <div id="userDropdown"
+            class="absolute left-0 bottom-full mb-2 w-full bg-neutral-950 border border-neutral-800 rounded-xl shadow-lg transform scale-95 opacity-0 origin-bottom transition-all duration-200 pointer-events-none flex-col z-50">
+            <button onclick="window.location.href='/settings'"
+              class="cursor-pointer w-full text-left px-4 py-2 hover:bg-neutral-900 rounded-xl transition-colors">Settings</button>
+            <form id="logoutFormSidebar" method="POST">
+              <button type="submit"
+                class="w-full text-left px-4 py-2 hover:bg-neutral-900 transition-colors text-red-500">Logout</button>
+            </form>
+          </div>
+        </div>
+      </div>
 </aside>
+
 <script>
   const isServerPage = window.location.pathname.startsWith('/server/');
   const mainNav = document.getElementById('mainSidebarNav');
@@ -129,8 +150,9 @@
     mainNav.classList.add('hidden');
     serverNav.classList.remove('hidden');
   }
-  </script>
-  <script>
+</script>
+
+<script>
   lucide.createIcons();
 
   const userButton = document.getElementById('userButton');
@@ -139,12 +161,12 @@
   let dropdownOpen = false;
   userButton.addEventListener('click', () => {
     dropdownOpen = !dropdownOpen;
-    if(dropdownOpen){
-      userDropdown.classList.remove('pointer-events-none','scale-95','opacity-0');
-      userDropdown.classList.add('scale-100','opacity-100');
+    if (dropdownOpen) {
+      userDropdown.classList.remove('pointer-events-none', 'scale-95', 'opacity-0');
+      userDropdown.classList.add('scale-100', 'opacity-100');
     } else {
-      userDropdown.classList.add('pointer-events-none','scale-95','opacity-0');
-      userDropdown.classList.remove('scale-100','opacity-100');
+      userDropdown.classList.add('pointer-events-none', 'scale-95', 'opacity-0');
+      userDropdown.classList.remove('scale-100', 'opacity-100');
     }
   });
 
@@ -154,7 +176,7 @@
     e.preventDefault();
     const response = await fetch("/logout", { method: "POST" });
     const res = await response.json();
-    if(res.success) window.location.href = "/";
+    if (res.success) window.location.href = "/";
     else alert("Logout failed");
   });
 
@@ -163,10 +185,9 @@
 
   sidebarLinks.forEach(link => {
     const href = link.getAttribute('href');
-    if(currentUrl === href || currentUrl.startsWith(href + '/')) {
+    if (currentUrl === href || currentUrl.startsWith(href + '/')) {
       link.classList.add('bg-neutral-900');
       link.classList.remove('hover:bg-neutral-900'); // optional
     }
   });
 </script>
-

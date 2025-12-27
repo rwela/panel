@@ -44,7 +44,10 @@
 
             <div class="leading-tight">
               <p class="text-lg font-semibold text-gray-100">
-                <%= server.name %>
+                <%= server.name %> <span id="written-status"
+                    class="inline-flex items-center rounded-full bg-stone-500/10 px-2 py-0.5 text-xs font-medium text-stone-400">
+                    Loading
+                  </span>
               </p>
               <p class="text-sm text-gray-400">
                 <%= server.ip || '0.0.0.0' %>:<%= server.port %>
@@ -86,60 +89,69 @@
             wait...</span>
         </div>
 
-          <!-- Custom Terminal + Charts -->
-          <div class="flex gap-4 h-96">
-            <!-- Terminal -->
-            <div id="terminal"
-              class="flex-1 bg-[#080808] border border-[#d4d4d4]/20 rounded-2xl flex flex-col overflow-hidden relative">
-              <!-- Loading spinner inside terminal -->
-              <div id="loading-overlay" class="absolute inset-0 z-10 flex items-center justify-center bg-[#080808]/80">
-                <i data-lucide="loader" class="animate-spin w-8 h-8 text-gray-100"></i>
-              </div>
+        <!-- Custom Terminal + Charts -->
+        <div class="flex gap-4 h-96">
+          <!-- Terminal -->
+          <div id="terminal"
+            class="flex-1 bg-[#080808] border border-[#d4d4d4]/20 rounded-2xl flex flex-col overflow-hidden relative">
+            <!-- Loading spinner inside terminal -->
+            <div id="loading-overlay" class="absolute inset-0 z-10 flex items-center justify-center bg-[#080808]/80">
+              <i data-lucide="loader" class="animate-spin w-8 h-8 text-gray-100"></i>
+            </div>
 
-              <!-- Terminal log -->
-              <div id="logContainer" class="flex-1 p-4 text-[#d4d4d4] text-sm space-y-1 relative"></div>
-              <!-- Input -->
-              <div class="flex items-center bg-[#080808] border border-[#d4d4d4]/20 rounded">
-                <!-- Input wrapper -->
-                <div class="relative flex-1">
-                  <i data-lucide="chevron-right"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#d4d4d4]/80"></i>
-                  <input id="cmdInput" type="text" placeholder="Type a command..."
-                    class="w-full bg-neutral-950 border-none rounded px-10 py-2 text-neutral-300 focus:outline-none focus:ring-2 focus:ring-[#d4d4d4]/50" />
-                </div>
-                <button id="sendBtn"
-                  class="bg-gray-100 text-stone-900 px-4 py-2 rounded font-semibold hover:bg-gray-300 transition active:scale-95 flex items-center gap-2">
-                  <i data-lucide="send" class="w-5 h-5 text-[#080808]"></i>
-                  <span>Send</span>
-                </button>
-
+            <!-- Terminal log -->
+            <div id="logContainer" class="flex-1 p-4 text-[#d4d4d4] text-sm space-y-1 relative"></div>
+            <!-- Input -->
+            <div class="flex items-center bg-[#080808] border border-[#d4d4d4]/20 rounded">
+              <!-- Input wrapper -->
+              <div class="relative flex-1">
+                <i data-lucide="chevron-right"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#d4d4d4]/80"></i>
+                <input id="cmdInput" type="text" placeholder="Type a command..."
+                  class="w-full bg-neutral-950 border-none rounded px-10 py-2 text-neutral-300 focus:outline-none focus:ring-2 focus:ring-[#d4d4d4]/50" />
               </div>
+              <button id="sendBtn"
+                class="bg-gray-100 text-stone-900 px-4 py-2 rounded font-semibold hover:bg-gray-300 transition active:scale-95 flex items-center gap-2">
+                <i data-lucide="send" class="w-5 h-5 text-[#080808]"></i>
+                <span>Send</span>
+              </button>
 
             </div>
+
           </div>
+        </div>
 
-          <!-- Charts -->
-          <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-6">
-            <h2 class="text-xl font-semibold mb-4">Server Usage</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- CPU Chart -->
-              <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
-                <h3 class="text-lg font-medium mb-2">CPU Usage (%)</h3>
-                <canvas id="cpuChart" height="150"></canvas>
-              </div>
+        <!-- Charts -->
+        <div class="flex gap-4 h-96 w-full">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-4 flex-1">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-semibold text-white">Server Usage</h2>
+              <span id="written-status2"
+                class="inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-400">
+                Running
+              </span>
+            </div>
 
-              <!-- RAM Chart -->
-              <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
-                <h3 class="text-lg font-medium mb-2">RAM Usage (GB)</h3>
-                <canvas id="ramChart" height="150"></canvas>
+            <!-- Chart container -->
+            <div class="mt-4 h-64 w-full">
+              <canvas id="usageChart" class="h-full w-full"></canvas>
+            </div>
+
+            <!-- Mini legend like your friend -->
+            <div class="flex items-center gap-6 mt-4 text-xs text-white/60">
+              <div class="flex items-center gap-2">
+                <div class="h-2 w-2 rounded-full bg-blue-500"></div> CPU
               </div>
-              <!-- RAM Chart -->
-              <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
-                <h3 class="text-lg font-medium mb-2">Disk Usage (GB)</h3>
-                <canvas id="diskChart" height="150"></canvas>
+              <div class="flex items-center gap-2">
+                <div class="h-2 w-2 rounded-full bg-purple-500"></div> RAM
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="h-2 w-2 rounded-full bg-red-500"></div> Disk
               </div>
             </div>
           </div>
+        </div>
+
 
       </div>
       <!-- Modal wrapper -->
@@ -232,7 +244,7 @@
             const logContainer = document.getElementById("logContainer");
 
             // 20-point sliding window for charts
-            const labels = Array(20).fill("");
+            const labels = Array.from({ length: 20 }, (_, i) => i - 19);
 
             // Show/hide the "node down" banner
             function nodeoff(isVisible) {
@@ -554,29 +566,39 @@
             let diskUsageKB = 0;
             let totalDiskGB = parseFloat("<%= server.disk %>");
             let serverRunning = false; // track server state
-
             async function updateDiskUsage() {
+              if (!serverRunning) {
+                return;
+              };
               try {
                 const res = await fetch(`/server/size/${serverId}`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                 });
+
                 const data = await res.json();
                 const usageBytes = data.size || 0;
 
-                diskUsageGB = (usageBytes / 1024 / 1024 / 1024).toFixed(2);
-                diskUsageMB = (usageBytes / 1024 / 1024).toFixed(2);
-                diskUsageKB = (usageBytes / 1024).toFixed(2);
-                diskChart.data.datasets[0].data.push(diskUsageGB);
-                diskChart.data.datasets[0].data.shift()
-                diskChart.update();
+                const totalDiskBytes = totalDiskGB * 1024 * 1024 * 1024;
+
+                const diskPercent =
+                  totalDiskBytes > 0
+                    ? (usageBytes / totalDiskBytes) * 100
+                    : 0;
+
+                const diskDataset = usageChart.data.datasets[2];
+
+                diskDataset.data.push(diskPercent);
+                diskDataset.data.shift();
+                usageChart.update();
+
               } catch (err) {
                 console.error("Failed to fetch disk usage:", err);
               }
             }
 
             updateDiskUsage();
-            setInterval(updateDiskUsage, 4000);
+            setInterval(updateDiskUsage, 1000);
             function sendPowerCommand(action) {
               // Prevent starting/restarting if disk is full
               if (
@@ -665,128 +687,186 @@
               if (e.key === "Escape" && !modal.classList.contains("hidden"))
                 closeConfirm();
             });
-
-            // --- Charts (Chart.js) ---
-            const cpuChart = new Chart(document.getElementById("cpuChart"), {
-              type: "line",
+            const usageChart = new Chart(document.getElementById('usageChart'), {
+              type: 'line',
               data: {
-                labels,
+                labels, // your existing 20-point sliding window
                 datasets: [
                   {
-                    label: "CPU Usage (cores)",
+                    label: 'CPU Usage (%)',
                     data: Array(20).fill(0),
-                    borderColor: "rgb(34,197,94)",
-                    backgroundColor: "rgba(34,197,94,0.2)",
-                    tension: 0.3,
+                    borderColor: '#3b82f6', // blue
+                    borderWidth: 2,
+                    tension: 0.4, // smooth monotone-like curve
+                    pointRadius: 0, // hide points
+                    fill: false, // no fill
+                  },
+                  {
+                    label: 'RAM Usage (%)',
+                    data: Array(20).fill(0),
+                    borderColor: '#8b5cf6', // purple
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    fill: false,
+                  },
+                  {
+                    label: 'Disk Usage (%)',
+                    data: Array(20).fill(0),
+                    borderColor: '#ef4444', // red
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    fill: false,
                   },
                 ],
               },
               options: {
-                animation: false,
                 responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                interaction: {
+                  mode: 'index',
+                  intersect: false,
+                },
+                plugins: {
+                  legend: {
+                    labels: {
+                      color: '#e5e7eb', // gray-200
+                      usePointStyle: true,
+                      pointStyle: 'circle',
+                      padding: 20,
+                    },
+                  },
+                  tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    callbacks: {
+                      label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`,
+                    },
+                  },
+                },
                 scales: {
-                  y: { beginAtZero: true, max: "<%= server.core %>" },
+                  y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                      color: '#9ca3af', // gray-400
+                      callback: (v) => `${v}%`,
+                    },
+                    grid: {
+                      color: 'rgba(255,255,255,0.05)', // subtle
+                      drawBorder: false,
+                    },
+                  },
+                  x: {
+                    ticks: {
+                      color: '#9ca3af',
+                    },
+                    grid: {
+                      display: false, // clean look
+                      drawBorder: false,
+                    },
+                  },
                 },
               },
             });
 
-            const ramChart = new Chart(document.getElementById("ramChart"), {
-              type: "line",
-              data: {
-                labels,
-                datasets: [
-                  {
-                    label: "RAM MB",
-                    data: Array(20).fill(0),
-                    borderColor: "rgb(59,130,246)",
-                    backgroundColor: "rgba(59,130,246,0.2)",
-                    tension: 0.3,
-                  },
-                ],
-              },
-              options: {
-                animation: false,
-                responsive: true,
-                scales: {
-                  y: { beginAtZero: true, max: Math.round(<%= server.ram %>) },
-                },
-              },
-            });
-
-            const diskChart = new Chart(document.getElementById("diskChart"), {
-              type: "line",
-              data: {
-                labels, // the same 20-point sliding window
-                datasets: [
-                  {
-                    label: "Disk Usage (GB)",
-                    data: Array(20).fill(0),
-                    borderColor: "rgb(239,68,68)", // red line
-                    backgroundColor: "rgba(239,68,68,0.2)", // light red fill
-                    tension: 0.3,
-                  },
-                ],
-              },
-              options: {
-                animation: false,
-                responsive: true,
-                scales: {
-                  y: { beginAtZero: true, max: totalDiskGB }, // scale according to total disk
-                },
-              },
-            });
 
             function updateStatus(payload) {
               const stats = payload.stats || payload;
 
-              // CPU usage in cores
+              if (
+                !stats ||
+                !stats.cpu_stats ||
+                !stats.precpu_stats ||
+                !stats.memory_stats
+              ) {
+                console.error("Invalid stats data:", payload);
+                return;
+              }
+
+              // ----- CPU % -----
               const cpuDelta =
                 stats.cpu_stats.cpu_usage.total_usage -
                 stats.precpu_stats.cpu_usage.total_usage;
+
               const systemDelta =
                 stats.cpu_stats.system_cpu_usage -
                 stats.precpu_stats.system_cpu_usage;
-              const cpuUsageCores =
+
+              const cpuPercent =
                 systemDelta > 0
-                  ? (cpuDelta / systemDelta) * stats.cpu_stats.online_cpus
+                  ? (cpuDelta / systemDelta) *
+                  stats.cpu_stats.online_cpus *
+                  100
                   : 0;
 
-              // RAM usage in MB
-              const ramMB = stats.memory_stats.usage / 1024 / 1024 || 0; // bytes → MB
+              // ----- RAM % -----
+              const ramPercent =
+                stats.memory_stats.limit > 0
+                  ? (stats.memory_stats.usage / stats.memory_stats.limit) * 100
+                  : 0;
 
-              // Update charts
-              cpuChart.data.datasets[0].data.push(cpuUsageCores);
-              cpuChart.data.datasets[0].data.shift();
-              cpuChart.update();
+              // Update merged chart
+              usageChart.data.datasets[0].data.push(cpuPercent);
+              usageChart.data.datasets[0].data.shift();
 
-              ramChart.data.datasets[0].data.push(ramMB);
-              ramChart.data.datasets[0].data.shift();
-              ramChart.update();
+              usageChart.data.datasets[1].data.push(ramPercent);
+              usageChart.data.datasets[1].data.shift();
 
-              // Status dot logic
-              const statusDot = document.getElementById("status-dot");
-              const online = ramMB > 0; // fixed variable (ramMB instead of undefined ramGB)
-              statusDot.innerHTML = online
-                ? `<span class="relative inline-flex h-3 w-3 items-center justify-center"><span class="absolute h-3 w-3 rounded-full bg-emerald-500 opacity-35"></span><span class="relative h-1.5 w-1.5 rounded-full bg-emerald-500"></span></span>`
-                : `<span class="relative inline-flex h-3 w-3 items-center justify-center"><span class="absolute h-3 w-3 rounded-full bg-gray-400 opacity-35"></span><span class="relative h-1.5 w-1.5 rounded-full bg-gray-400"></span></span>`;
+              usageChart.update();
 
-              // Power buttons logic
+              const online = ramPercent > 0;
+              const statusEl = document.getElementById('written-status');
+              const statusEl2 = document.getElementById('written-status2');
+              const statusDot = document.getElementById('status-dot');
+              if (statusDot) {
+                statusDot.innerHTML = online
+                  ? `<span class="relative inline-flex h-3 w-3 items-center justify-center"><span class="absolute h-3 w-3 rounded-full bg-emerald-500 opacity-35"></span><span class="relative h-1.5 w-1.5 rounded-full bg-emerald-500"></span></span>`
+                  : `<span class="relative inline-flex h-3 w-3 items-center justify-center"><span class="absolute h-3 w-3 rounded-full bg-gray-400 opacity-35"></span><span class="relative h-1.5 w-1.5 rounded-full bg-gray-400"></span></span>`;
+              }
+              if (online) {
+                statusEl.textContent = 'Running';
+                statusEl.classList.remove('bg-red-500/10', 'text-red-400');
+                statusEl.classList.remove('bg-stone-500/10', 'text-stone-400');
+                statusEl.classList.add('bg-green-500/10', 'text-green-400');
+                statusEl2.textContent = 'Running';
+                statusEl2.classList.remove('bg-red-500/10', 'text-red-400');
+                statusEl2.classList.remove('bg-stone-500/10', 'text-stone-400');
+                statusEl2.classList.add('bg-green-500/10', 'text-green-400');
+              } else {
+                statusEl2.textContent = 'Offline';
+                statusEl2.classList.remove('bg-stone-500/10', 'text-stone-400');
+                statusEl2.classList.remove('bg-green-500/10', 'text-green-400');
+                statusEl2.classList.add('bg-red-500/10', 'text-red-400');
+                statusEl.textContent = 'Offline';
+                statusEl.classList.remove('bg-stone-500/10', 'text-stone-400');
+                statusEl.classList.remove('bg-green-500/10', 'text-green-400');
+                statusEl.classList.add('bg-red-500/10', 'text-red-400');
+              }
               document
-                .querySelectorAll("#power-actions button[data-action]")
+                .querySelectorAll('#power-actions button[data-action]')
                 .forEach((btn) => {
-                  const action = btn.getAttribute("data-action");
+                  const action = btn.getAttribute('data-action');
+
 
                   btn.disabled = false;
-                  btn.classList.remove("opacity-50", "cursor-not-allowed");
+                  btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-                  if (online && action === "start") {
+
+                  if (online && action === 'start') {
                     btn.disabled = true;
-                    btn.classList.add("opacity-50", "cursor-not-allowed");
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
                   }
 
-                  if (!online && (action === "stop" || action === "restart")) {
+
+                  if (!online && (action === 'stop' || action === 'restart')) {
                     btn.disabled = true;
-                    btn.classList.add("opacity-50", "cursor-not-allowed");
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
                   }
                 });
             }

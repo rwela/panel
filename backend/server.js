@@ -98,10 +98,6 @@ router.post("/server/size/:id", requireAuth, withServer, async (req, res) => {
     );
     size = response.data.total;
   } catch (err) {
-    console.error(
-      "Error fetching server size:",
-      err.response?.data || err.message
-    );
     size = 0;
   }
 
@@ -152,15 +148,47 @@ router.get(
           params: { location: "eula.txt", key: node.key },
         }
       );
-
       const content = response.data?.content || "";
       const accepted = content.trim().toLowerCase() === "eula=true";
 
       res.json({ success: true, eulaAccepted: accepted });
     } catch (err) {
-      // If file doesn't exist, consider EULA not accepted
-      res.json({ success: true, eulaAccepted: false });
+      // Node responded (online) but file doesn't exist
+      if (err.response) {
+        // 404 = eula.txt missing → not accepted yet
+        if (err.response.status === 404) {
+          return res.json({
+            success: true,
+            eulaAccepted: false,
+            nodeOnline: true,
+            reason: "EULA file not found",
+          });
+        }
+
+        // Other node-side errors
+        return res.json({
+          success: false,
+          nodeOnline: true,
+          message: "Node error",
+        });
+      }
+
+      // No response at all → node is offline / unreachable
+      if (err.request) {
+        return res.status(503).json({
+          success: false,
+          nodeOnline: false,
+          message: "Node offline or unreachable",
+        });
+      }
+
+      // Unknown error
+      return res.status(500).json({
+        success: false,
+        message: "Internal error",
+      });
     }
+
   }
 );
 
@@ -859,7 +887,7 @@ router.get("/server/network/:id", requireAuth, withServer, (req, res) => {
     name: appName,
     user,
     server,
-    allocations, 
+    allocations,
   });
 });
 
