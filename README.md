@@ -5,7 +5,7 @@
 <h1 align="center">Talorix</h1>
 
 <p align="center">
-  can we replace pterodactyl forever? like can we? everything is not impossible
+  can we replace pterodactyl forever? like can we? everything is not impossible 
 </p>
 
 <p align="center">
@@ -14,6 +14,6 @@
 
 ---
 
-Provided an answer to the question: “Can we do better?”
+Provided an answer to the question: “Can we do better ?”
 
 ---

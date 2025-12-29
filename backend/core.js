@@ -47,6 +47,16 @@ function requireAdmin(req, res, next) {
 ========================= */
 
 router.get("/dashboard", requireAuth, (req, res) => {
+  let isAdmin;
+  if (req.query.admin === "true") {
+    const user = unsqh.get("users", req.session.userId);
+    if (!user || user.admin !== true) {
+      isAdmin = false;
+    } else if (user.admin) {
+      isAdmin = true;
+    }
+  }
+
   const user = unsqh.get("users", req.session.userId);
   if (!user) return res.redirect("/");
 
@@ -57,6 +67,9 @@ router.get("/dashboard", requireAuth, (req, res) => {
   res.render("user/dashboard", {
     name: appName,
     user: safeUser,
+    servers: isAdmin
+      ? unsqh.list("servers").filter(s => !safeUser.servers.includes(s.id))
+      : safeUser.servers.map(s => typeof s === "string" ? unsqh.get("servers", s) : s),
   });
 });
 
@@ -212,7 +225,7 @@ router.get("/admin/node/:id", requireAuth, requireAdmin, async (req, res) => {
   const stats = data.stats;
 
   if (stats?.totalCpuCores && stats?.totalRamGB) {
-    const totalRamGB = Number(stats.totalRamGB); 
+    const totalRamGB = Number(stats.totalRamGB);
     const ramMB = Math.round(totalRamGB * 1024);
 
     unsqh.update("nodes", req.params.id, {
@@ -1233,7 +1246,7 @@ router.get("/admin/server/edit/:serverId", requireAuth, requireAdmin, (req, res)
   const server = unsqh.get("servers", serverId);
   if (!server) return res.status(404).send("Server not found");
 
-  const user = unsqh.get("users", server.userId);
+  const user = unsqh.get("users", req.session.userId);
   const nodes = unsqh.list("nodes").filter((n) => n.status === "online");
   const images = unsqh.list("images");
   const users = unsqh.list("users");
