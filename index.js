@@ -87,19 +87,24 @@ async function getVersion() {
   | |/ _\` | |/ _ \\| '__| \\ \\/ /
   | | (_| | | (_) | |  | |>  <    ${version}
   |_|\\__,_|_|\\___/|_|  |_/_/\\_\\
+
+Copyright © %s Talon Project
+
+Website:  https://taloix.io
+Source:   https://github.com/talorix/panel
 `;
   const gray = '\x1b[90m'
   const reset = '\x1b[0m'; 
   const asciiWithColor = ascii.replace(version, reset + version + gray);
-  console.log(gray + asciiWithColor + reset);
+  console.log(gray + asciiWithColor + reset, new Date().getFullYear());
   return;
 }
 
-async function startApp() {
+async function start() {
   await getVersion();
   app.listen(PORT, () => {
     Logger.success(`Talorix have started on the port ${PORT}`);
   });
 }
 
-startApp();
+start();

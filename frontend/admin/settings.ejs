@@ -28,7 +28,7 @@
 
     /* a little visual emphasis for large action buttons */
     .big-btn {
-      @apply inline-flex items-center justify-center gap-3 px-6 py-3 rounded-2xl font-semibold text-lg;
+      @apply inline-flex items-center justify-center gap-3 px-6 py-3 rounded-md font-semibold text-lg;
     }
   </style>
 </head>
@@ -39,7 +39,7 @@
     <main class="flex-1 p-8 overflow-auto">
       <div class="max-w-4xl mx-auto space-y-6">
         <!-- Header -->
-        <div class="bg-neutral-950 border border-neutral-900 p-6 rounded-2xl">
+        <div class="bg-neutral-950 border border-neutral-900 p-6 rounded-md">
           <h1 class="text-3xl font-bold flex items-center gap-2">
             <i data-lucide="user" class="w-6 h-6"></i> Settings
           </h1>
@@ -59,7 +59,7 @@
         </div>
 
         <!-- Overview Tab -->
-        <div id="overview" class="tab-content bg-neutral-950 border border-neutral-800 rounded-b-2xl p-6 space-y-6">
+        <div id="overview" class="tab-content bg-neutral-950 border border-neutral-800 rounded-b-md p-6 space-y-6">
           <!-- Version banner (hidden by default) -->
           <div id="versionBanner" class="hidden rounded-lg p-3 text-white bg-red-700 flex items-center gap-3">
             <i data-lucide="alert-circle" class="w-5 h-5"></i>
@@ -74,7 +74,7 @@
             </div>
           </div>
 
-          <img src="https://talorix.io/talorix-banner.png" alt="Talorix Banner"
+          <img src="https://talorix.io/talorix-banner2.png" alt="Talorix Banner"
             class="rounded-xl border border-neutral-800" />
 
           <div class="space-y-3">
@@ -105,7 +105,7 @@
         </div>
 
         <!-- Settings Tab -->
-        <div id="settings" class="tab-content hidden bg-neutral-950 border border-neutral-800 rounded-b-2xl p-6">
+        <div id="settings" class="tab-content hidden bg-neutral-950 border border-neutral-800 rounded-b-md p-6">
           <form id="settingsForm" class="space-y-4">
             <div>
               <label for="name" class="block text-gray-400 mb-1">

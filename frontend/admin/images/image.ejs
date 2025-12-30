@@ -1,73 +1,103 @@
 <!DOCTYPE html>
 <html lang="en" class="bg-neutral-950 text-gray-100 font-space-grotesk">
-  <head>
-    <meta charset="UTF-8" />
-    <title><%= name %> - Image Details</title>
-    <link rel="stylesheet" href="/assets/tailwind.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-  </head>
-  <body class="min-h-screen flex">
-    <%- include('../../components/sidebar', { name, user }) %>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>
+    <%= name %> - Image Details
+  </title>
+  <link rel="stylesheet" href="/assets/tailwind.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="min-h-screen flex">
+  <%- include('../../components/sidebar', { name, user }) %>
 
     <main class="flex-1 p-8 overflow-auto">
       <div class="max-w-4xl mx-auto space-y-6">
 
         <!-- Header -->
-        <div class="flex justify-between items-center bg-neutral-950 border border-neutral-900 p-6 rounded-2xl">
+        <div class="flex justify-between items-center bg-neutral-950 border border-neutral-900 p-6 rounded-md">
           <h1 class="text-3xl font-bold">🖼 Image Details</h1>
           <div class="flex gap-2">
-            <button
-              onclick="deleteImage('<%= image.id %>')"
-              class="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-medium"
-            >
+            <button onclick="deleteImage('<%= image.id %>')"
+              class="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-medium">
               <i data-lucide="trash-2" class="w-4 h-4"></i> Delete
             </button>
-            <a
-              href="/admin/images/export/<%= image.id %>"
-              target="_blank"
-              class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl font-medium"
-            >
+            <a href="/admin/images/export/<%= image.id %>" target="_blank"
+              class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl font-medium">
               <i data-lucide="download" class="w-4 h-4"></i> Export
             </a>
           </div>
         </div>
 
         <!-- Image Details -->
-        <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl space-y-4">
-          <p><strong>Name:</strong> <%= image.name %></p>
-          <p><strong>Docker Image:</strong> <%= image.dockerImage %></p>
-          <p><strong>Description:</strong> <%= image.description || 'No description' %></p>
-          <p><strong>Created At:</strong> <%= new Date(image.createdAt).toLocaleString() %></p>
+        <div class="bg-neutral-950 border border-neutral-800 p-6 rounded-md space-y-4">
+          <p><strong>Name:</strong>
+            <%= image.name %>
+          </p>
+          <p><strong>Docker Image:</strong>
+            <%= image.dockerImage %>
+          </p>
+          <p><strong>Description:</strong>
+            <%= image.description || 'No description' %>
+          </p>
+          <p><strong>Created At:</strong>
+            <%= new Date(image.createdAt).toLocaleString() %>
+          </p>
+           <p><strong>Stop Command:</strong>
+              <code class="bg-neutral-950 border border-neutral-700 rounded-md p-1 text-sm text-red-400 overflow-x-auto"><%= image.stopCmd || 'No stop command' %></code>
+          </p>
 
           <div>
             <h2 class="font-semibold mb-2">Environment Variables</h2>
             <% if (image.envs && Object.keys(image.envs).length) { %>
               <ul class="list-disc list-inside text-gray-400">
-                <% Object.entries(image.envs).forEach(([key, value]) => { %>
-                  <li><strong><%= key %>:</strong> <%= value %></li>
-                <% }) %>
+                <% Object.entries(image.envs).forEach(([key, value])=> { %>
+                  <li><strong>
+                      <%= key %>:
+                    </strong>
+                    <%= value %>
+                  </li>
+                  <% }) %>
               </ul>
-            <% } else { %>
-              <p class="text-gray-500">No environment variables set.</p>
-            <% } %>
+              <% } else { %>
+                <p class="text-gray-500">No environment variables set.</p>
+                <% } %>
           </div>
 
           <div>
             <h2 class="font-semibold mb-2">Files</h2>
             <% if (image.files && image.files.length) { %>
               <ul class="list-disc list-inside text-gray-400">
-                <% image.files.forEach(file => { %>
+                <% image.files.forEach(file=> { %>
                   <li>
                     <a href="<%= file.url %>" target="_blank" class="text-indigo-400 hover:underline">
                       <%= file.filename %>
                     </a>
                   </li>
-                <% }) %>
+                  <% }) %>
               </ul>
-            <% } else { %>
-              <p class="text-gray-500">No files uploaded.</p>
-            <% } %>
+              <% } else { %>
+                <p class="text-gray-500">No files uploaded.</p>
+                <% } %>
           </div>
+          <div>
+            <h2 class="font-semibold mb-2">Features</h2>
+
+            <% if (image.features && image.features.length) { %>
+              <div class="flex flex-wrap gap-2">
+                <% image.features.forEach(feature=> { %>
+                  <span class="px-3 py-1 rounded-xl bg-indigo-600/20 text-indigo-400 text-sm font-medium">
+                    <%= feature %>
+                  </span>
+                  <% }) %>
+              </div>
+              <% } else { %>
+                <p class="text-gray-500">No features defined.</p>
+                <% } %>
+          </div>
+
         </div>
       </div>
     </main>
@@ -86,5 +116,6 @@
         }
       }
     </script>
-  </body>
+</body>
+
 </html>

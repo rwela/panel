@@ -855,10 +855,10 @@ router.get(
 /**
  * POST /admin/images/new
  * Create a new image
- * body: { dockerImage, name, description, envs, files }
+ * body: { dockerImage, name, description, envs, files, features }
  */
 router.post("/admin/images/new", requireAuth, requireAdmin, (req, res) => {
-  const { dockerImage, name, description, envs, files } = req.body;
+  const { dockerImage, name, description, envs, files, features } = req.body;
 
   if (!dockerImage || !name)
     return res.status(400).json({ error: "Missing fields" });
@@ -872,6 +872,7 @@ router.post("/admin/images/new", requireAuth, requireAdmin, (req, res) => {
     envs: envs || {},
     files: files || [], // [{ filename, url }]
     createdAt: Date.now(),
+    features: Array.isArray(features) ? features : [],
   };
 
   unsqh.put("images", id, image);
@@ -1086,6 +1087,7 @@ router.post(
         allocationId,
         ip: `${domain ?? ip}`,
         imageId,
+        image,
         name,
         ram,
         core,
@@ -1209,6 +1211,7 @@ router.post(
       server.disk = disk || server.disk;
       server.port = server.port;
       server.env = mergedEnv;
+      server.image = image;
       server.imageId = image.id;
       server.containerId = containerId;
       server.files = resolvedFiles;
@@ -1275,25 +1278,6 @@ router.post(
   async (req, res) => {
     const server = unsqh.get("servers", req.params.id);
     if (!server) return res.status(404).json({ error: "Server not found" });
-
-    if (
-      server.node &&
-      server.node.ip &&
-      server.node.key &&
-      server.containerId
-    ) {
-      try {
-        await axios.post(
-          `http://${server.node.ip}:${server.node.port}/server/action/${server.containerId}?action=stop&key=${server.node.key}`
-        );
-      } catch (nodeErr) {
-        console.warn(
-          "Failed to stop server on node, ignoring:",
-          nodeErr.message
-        );
-      }
-    }
-
     server.suspended = true;
     unsqh.update("servers", server.id, { suspended: true });
 
@@ -1420,4 +1404,140 @@ router.post("/admin/settings", requireAuth, requireAdmin, (req, res) => {
   res.json({ success: true, settings: updatedSettings });
 });
 
+function normalizeBool(val) {
+  // Accept true/false, "true"/"false", 1/0, etc.
+  if (typeof val === "boolean") return val;
+  if (typeof val === "number") return val === 1;
+  if (typeof val === "string") {
+    return val === "true" || val === "1" || val === "yes" || val === "on";
+  }
+  return false;
+}
+
+router.get("/admin/apikeys", requireAuth, requireAdmin, (req, res) => {
+  const rawKeys = unsqh.list("apikeys") || [];
+  // Show only non-sensitive fields; preview contains masked token part
+  const visibleKeys = rawKeys.map((k) => {
+    return {
+      id: k.id,
+      name: k.name || null,
+      preview: k.preview || null,
+      perms: k.perms || {},
+      createdAt: k.createdAt,
+      updatedAt: k.updatedAt || null,
+      visible: k.visible !== false, // default true
+    };
+  });
+
+  const settings = unsqh.get("settings", "app") || {};
+  const appName = settings.name || "App";
+  const user = unsqh.get("users", req.session.userId);
+
+  res.render("admin/apikeys/index", {
+    name: appName,
+    user,
+    apikeys: visibleKeys,
+  });
+});
+
+/**
+ * POST /admin/apikeys/new
+ * body: { nodes, servers, users, settings, images, name?, visible? }
+ * returns: { success: true, id, token, preview, perms }
+ */
+router.post("/admin/apikeys/new", requireAuth, requireAdmin, (req, res) => {
+  const { nodes, servers, users, settings: settingsPerm, images, name, visible } = req.body || {};
+
+  // Normalize incoming booleans
+  const perms = {
+    nodes: normalizeBool(nodes),
+    servers: normalizeBool(servers),
+    users: normalizeBool(users),
+    settings: normalizeBool(settingsPerm),
+    images: normalizeBool(images),
+  };
+
+  // Generate token and store only its hash
+  const token = crypto.randomBytes(32).toString("hex"); // 64 hex chars
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+  // Create a small preview to display in listing (not sensitive)
+  const preview = `${token.slice(0, 6)}...${token.slice(-4)}`;
+
+  const id = crypto.randomUUID();
+  const keyObj = {
+    id,
+    name: name ? String(name).trim() : null,
+    tokenHash,
+    preview,
+    perms,
+    visible: visible === undefined ? true : normalizeBool(visible),
+    createdAt: Date.now(),
+  };
+
+  unsqh.put("apikeys", id, keyObj);
+
+  // Return the raw token once (admin must copy it now). Do NOT store raw token.
+  res.json({
+    success: true,
+    id,
+    token,
+    preview,
+    perms,
+  });
+});
+
+/**
+ * POST /admin/apikeys/edit
+ * body: { id, nodes, servers, users, settings, images, name?, visible? }
+ */
+router.post("/admin/apikeys/edit", requireAuth, requireAdmin, (req, res) => {
+  const { id, nodes, servers, users, settings: settingsPerm, images, name, visible } = req.body || {};
+
+  if (!id) return res.status(400).json({ error: "id is required" });
+
+  const existing = unsqh.get("apikeys", id);
+  if (!existing) return res.status(404).json({ error: "API key not found" });
+
+  const updated = { ...existing };
+
+  // Update perms only if provided (allow toggling)
+  if (typeof nodes !== "undefined" || typeof servers !== "undefined" || typeof users !== "undefined" || typeof settingsPerm !== "undefined" || typeof images !== "undefined") {
+    updated.perms = {
+      nodes: typeof nodes === "undefined" ? existing.perms?.nodes === true : normalizeBool(nodes),
+      servers: typeof servers === "undefined" ? existing.perms?.servers === true : normalizeBool(servers),
+      users: typeof users === "undefined" ? existing.perms?.users === true : normalizeBool(users),
+      settings: typeof settingsPerm === "undefined" ? existing.perms?.settings === true : normalizeBool(settingsPerm),
+      images: typeof images === "undefined" ? existing.perms?.images === true : normalizeBool(images),
+    };
+  }
+
+  if (typeof name !== "undefined") updated.name = name ? String(name).trim() : null;
+  if (typeof visible !== "undefined") updated.visible = normalizeBool(visible);
+
+  updated.updatedAt = Date.now();
+
+  unsqh.update("apikeys", id, updated);
+
+  res.json({ success: true, id, perms: updated.perms, name: updated.name, visible: updated.visible });
+});
+
+/**
+ * DELETE /admin/apikeys/delete?id=<id>
+ */
+router.delete("/admin/apikeys/delete", requireAuth, requireAdmin, (req, res) => {
+  const id = req.query.id || (req.body && req.body.id);
+  if (!id) return res.status(400).json({ error: "id query parameter is required" });
+
+  const existing = unsqh.get("apikeys", id);
+  if (!existing) return res.status(404).json({ error: "API key not found" });
+
+  try {
+    unsqh.delete("apikeys", id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Failed to delete apikey:", err);
+    res.status(500).json({ error: "Failed to delete API key" });
+  }
+});
 module.exports = router;

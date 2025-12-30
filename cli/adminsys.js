@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+
 const prompts = require("prompts");
 const crypto = require("crypto");
 const unsqh = require("../modules/db.js");
 const Logger = require("../modules/logger.js");
+
 (async () => {
   Logger.log("=== Talorix Admin System ===\n");
 
@@ -17,6 +19,9 @@ const Logger = require("../modules/logger.js");
     ],
   });
 
+  /* ============================
+     CREATE ADMIN USER
+  ============================ */
   if (response.action === "create") {
     const userData = await prompts([
       { type: "text", name: "username", message: "Username:" },
@@ -27,6 +32,7 @@ const Logger = require("../modules/logger.js");
     const existing = unsqh
       .list("users")
       .find((u) => u.email === userData.email);
+
     if (existing) {
       Logger.log("Error: User with this email already exists.");
       process.exit(1);
@@ -48,7 +54,12 @@ const Logger = require("../modules/logger.js");
     });
 
     Logger.log(`Admin user created: ${userData.username} (${userData.email})`);
-  } else if (response.action === "set") {
+  }
+
+  /* ============================
+     SET USER AS ADMIN
+  ============================ */
+  else if (response.action === "set") {
     const emailResponse = await prompts({
       type: "text",
       name: "email",
@@ -58,6 +69,7 @@ const Logger = require("../modules/logger.js");
     const user = unsqh
       .list("users")
       .find((u) => u.email === emailResponse.email);
+
     if (!user) {
       Logger.log("Error: No user found with that email.");
       process.exit(1);
@@ -65,17 +77,25 @@ const Logger = require("../modules/logger.js");
 
     unsqh.put("users", user.id, { ...user, admin: true });
     Logger.log(`User ${user.username} (${user.email}) is now an admin.`);
-  } else if (response.action === "fetchImages") {
+  }
+
+  /* ============================
+     FETCH & SYNC IMAGES
+  ============================ */
+  else if (response.action === "fetchImages") {
     const url =
       "https://raw.githubusercontent.com/Talorix/Container-Images/refs/heads/main/image_library.json";
 
     try {
       const libraryResp = await fetch(url);
-      if (!libraryResp.ok)
+      if (!libraryResp.ok) {
         throw new Error(`Failed to fetch URL: ${libraryResp.status}`);
+      }
+
       const library = await libraryResp.json();
 
       const addedImages = [];
+      const updatedImages = [];
       const skippedImages = [];
 
       for (const key in library) {
@@ -83,53 +103,84 @@ const Logger = require("../modules/logger.js");
 
         const imageResp = await fetch(imageUrl);
         if (!imageResp.ok) continue;
+
         const imageData = await imageResp.json();
+        const { dockerImage, name, description, envs, files, features, stopCmd } =
+          imageData;
 
-        const { dockerImage, name, description, envs, files, features } = imageData;
-        if (!dockerImage || !name) continue;
+        if (!dockerImage || !name || !stopCmd) continue;
 
-        // Check if an identical image already exists
-        const exists = unsqh.list("images").some((img) => {
-          return (
-            img.dockerImage === dockerImage &&
-            img.name === name &&
-            img.description === (description || "") &&
-            JSON.stringify(img.envs || {}) === JSON.stringify(envs || {}) &&
-            JSON.stringify(img.files || []) === JSON.stringify(files || [])
-          );
-        });
+        const existingImage = unsqh
+          .list("images")
+          .find((img) => img.dockerImage === dockerImage);
 
-        if (exists) {
-          skippedImages.push(name);
-          continue; // skip identical
-        }
-
-        // Add new or updated image
-        const id = crypto.randomUUID();
-        const image = {
-          id,
+        const normalized = {
           dockerImage,
           name,
           description: description || "",
           envs: envs || {},
           files: files || [],
-          features: Array.isArray(features) ? features : [], 
-          createdAt: Date.now(),
+          features: Array.isArray(features) ? features : [],
+          stopCmd: stopCmd || "",
         };
 
-        unsqh.put("images", id, image);
-        addedImages.push(image);
+        if (existingImage) {
+          // Check if identical → skip
+          const identical =
+            existingImage.name === normalized.name &&
+            existingImage.description === normalized.description &&
+            JSON.stringify(existingImage.envs || {}) ===
+              JSON.stringify(normalized.envs) &&
+            JSON.stringify(existingImage.files || []) ===
+              JSON.stringify(normalized.files) &&
+            JSON.stringify(existingImage.features || []) ===
+              JSON.stringify(normalized.features) &&
+            JSON.stringify(existingImage.stopCmd || "") ===
+              JSON.stringify(normalized.stopCmd);
+          if (identical) {
+            skippedImages.push(name);
+            continue;
+          }
+
+          // UPDATE existing image (same ID)
+          const updated = {
+            ...existingImage,
+            ...normalized,
+            updatedAt: Date.now(),
+          };
+
+          unsqh.put("images", existingImage.id, updated);
+          updatedImages.push(updated);
+        } else {
+          // CREATE new image
+          const id = crypto.randomUUID();
+
+          const image = {
+            id,
+            ...normalized,
+            createdAt: Date.now(),
+          };
+
+          unsqh.put("images", id, image);
+          addedImages.push(image);
+        }
       }
 
-      Logger.log(`Successfully added/updated ${addedImages.length} images.`);
-      addedImages.forEach((img) =>
-        Logger.log(`- ${img.name} (${img.dockerImage})`)
+      Logger.log(
+        `Images synced: ${addedImages.length} added, ${updatedImages.length} updated, ${skippedImages.length} unchanged.`
       );
 
-      if (skippedImages.length > 0) {
-        Logger.log(`Skipped ${skippedImages.length} identical images:`);
-        skippedImages.forEach((name) => Logger.log(`- ${name}`));
-      }
+      addedImages.forEach((img) =>
+        Logger.log(`+ Added: ${img.name} (${img.dockerImage})`)
+      );
+
+      updatedImages.forEach((img) =>
+        Logger.log(`~ Updated: ${img.name} (${img.dockerImage})`)
+      );
+
+      skippedImages.forEach((name) =>
+        Logger.log(`= Skipped: ${name}`)
+      );
     } catch (err) {
       Logger.log("Error fetching images:", err.message);
     }

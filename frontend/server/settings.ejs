@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-neutral-950 text-gray-100 font-figtree">
+<html lang="en" class="bg-neutral-950 text-gray-100 font-space-grotesk">
 
 <head>
   <meta charset="UTF-8" />
   <title>
     <%= name %> - <%= server.name %> Settings
   </title>
-
-  <!-- Tailwind CSS (link + script per your preference) -->
   <link rel="stylesheet" href="/assets/tailwind.css">
   <script src="/assets/tailwind.css"></script>
 
@@ -29,7 +27,7 @@
     <main class="flex-1 p-8 overflow-auto">
       <div class="max-w-6xl mx-auto space-y-6">
         <!-- Server Header -->
-        <div class="bg-neutral-950 border border-neutral-900 rounded-2xl px-6 py-4 flex items-center justify-between">
+        <div class="bg-neutral-950 border border-neutral-900 rounded-md px-6 py-4 flex items-center justify-between">
           <!-- LEFT INFO -->
           <div class="flex items-start gap-3">
             <!-- Status dot -->
@@ -69,7 +67,7 @@
                 <% } %>
 
                   <!-- TAB LAYOUT -->
-                  <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
+                  <div class="bg-neutral-950 border border-neutral-800 rounded-md p-4">
                     <!-- Tab buttons -->
                     <div role="tablist" aria-label="Server settings tabs"
                       class="inline-flex items-center gap-1 rounded-lg bg-neutral-900 p-1 text-neutral-400">
@@ -111,7 +109,7 @@
                         <!-- Grid layout: 1 col on mobile, 2 on md+, gap between cards -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <!-- Rename Server (span 1 col) -->
-                          <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-4">
+                          <div class="bg-neutral-950 border border-neutral-800 rounded-md p-6 space-y-4">
                             <h2 class="text-xl font-semibold">Rename Server</h2>
                             <form action="/server/settings/<%= server.id %>/rename" method="POST" class="flex gap-2">
                               <input type="text" name="newName" placeholder="New server name"
@@ -123,7 +121,7 @@
                           </div>
 
                           <!-- Server Metadata (span 1 col) -->
-                          <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6">
+                          <div class="bg-neutral-950 border border-neutral-800 rounded-md p-6">
                             <h3 class="text-lg font-semibold">Server Metadata</h3>
                             <div class="mt-2 text-sm text-gray-400 space-y-1">
                               <div>Node: <span class="text-gray-100">
@@ -142,7 +140,7 @@
                           </div>
 
                           <!-- Environment Variables (span full width on md: both columns) -->
-                          <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-4 md:col-span-2">
+                          <div class="bg-neutral-950 border border-neutral-800 rounded-md p-6 space-y-4 md:col-span-2">
                             <h2 class="text-xl font-semibold">Environment Variables</h2>
 
                             <% if (!server.env || Object.keys(server.env).length===0) { %>
@@ -171,7 +169,7 @@
                       <section id="tab-subusers" role="tabpanel" aria-labelledby="tabbtn-subusers"
                         class="tab-panel hidden opacity-0">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 md:col-span-2">
+                          <div class="bg-neutral-950 border border-neutral-800 rounded-md p-6 md:col-span-2">
                             <div class="flex items-center justify-between">
                               <h2 class="text-xl font-semibold">Manage Subusers</h2>
                               <div class="text-sm text-gray-400">Owner: <span class="text-gray-100 ml-2">
@@ -247,13 +245,13 @@
                       <section id="tab-sftp" role="tabpanel" aria-labelledby="tabbtn-sftp"
                         class="tab-panel hidden opacity-0" aria-hidden="true">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 md:col-span-2">
+                          <div class="bg-neutral-950 border border-neutral-800 rounded-md p-6 md:col-span-2">
                             <h2 class="text-xl font-semibold">SFTP (Not implemented)</h2>
                             <p class="text-gray-400 mt-1">SFTP functionality is not implemented yet. This tab is
                               intentionally disabled.</p>
                           </div>
 
-                          <div class="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 md:col-span-2">
+                          <div class="bg-neutral-950 border border-neutral-800 rounded-md p-6 md:col-span-2">
                             <div class="mt-4 grid grid-cols-1 gap-3">
                               <input
                                 class="p-3 rounded-lg bg-neutral-950 border border-neutral-800 text-gray-500 cursor-not-allowed"
@@ -276,7 +274,7 @@
                         class="tab-panel hidden opacity-0" aria-hidden="true">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <!-- Reinstall Server (span md:2 for emphasis) -->
-                          <div class="bg-red-900/30 rounded-2xl p-6 space-y-4 md:col-span-2">
+                          <div class="bg-red-900/30 rounded-md p-6 space-y-4 md:col-span-2">
                             <h2 class="text-xl font-semibold text-red-100">Reinstall Server</h2>
                             <p class="text-red-200">This will reinstall the server and replace its files with the latest
                               versions.</p>
@@ -299,7 +297,7 @@
     <div id="reinstall-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
       <div class="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm transition-opacity duration-200"></div>
       <div
-        class="relative z-10 max-w-lg w-full mx-4 rounded-2xl bg-neutral-950 text-gray-100 shadow-xl ring-1 ring-black/10 overflow-hidden transform transition-all duration-200 ease-out scale-95 opacity-0 border border-neutral-900">
+        class="relative z-10 max-w-lg w-full mx-4 rounded-md bg-neutral-950 text-gray-100 shadow-xl ring-1 ring-black/10 overflow-hidden transform transition-all duration-200 ease-out scale-95 opacity-0 border border-neutral-900">
         <div class="p-6">
           <div class="flex items-start gap-4">
             <div class="flex-1">

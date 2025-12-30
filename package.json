@@ -7,6 +7,9 @@
     "admin": "node cli/adminsys",
     "tmkc": "npx @tailwindcss/cli -i ./public/tw.conf -o ./public/assets/tailwind.css --watch"
   },
+  "bin": {
+    "talorix": "./cli/talorix.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HydrenFOSS/Talorix.git"

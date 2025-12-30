@@ -57,7 +57,7 @@
 
     <main class="flex-1 p-8 overflow-auto">
       <div class="max-w-6xl mx-auto space-y-6">
-        <div class="bg-neutral-950 border border-neutral-900 rounded-2xl px-6 py-4 flex items-center justify-between">
+        <div class="bg-neutral-950 border border-neutral-900 rounded-md px-6 py-4 flex items-center justify-between">
           <!-- LEFT INFO -->
           <div class="flex items-start gap-3">
             <!-- Status dot -->
@@ -214,7 +214,7 @@
                       <i data-lucide="more-vertical"></i>
                     </button>
                     <div
-                      class="dropdownMenu transition-all scale-95 opacity-0 absolute right-0 mt-1 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-lg hidden flex flex-col z-50 min-w-[120px]">
+                      class="dropdownMenu transition-all scale-95 opacity-0 absolute right-0 mt-1 bg-neutral-900 border border-neutral-800 rounded-md shadow-lg hidden flex flex-col z-50 min-w-[120px]">
                       <form method="POST"
                         action="/server/files/<%= server.id %>/<%= file.type %>/delete?location=<%= encodeURIComponent(path + '/' + file.name) %>"
                         onsubmit="return confirm('Delete <%= file.name %>?');">
@@ -261,10 +261,10 @@
 
           <div class="mt-4 flex flex-col gap-3">
             <input id="modalInput"
-              class="w-full p-3 rounded-2xl bg-neutral-800 border border-neutral-700 text-neutral-100"
+              class="w-full p-3 rounded-md bg-neutral-800 border border-neutral-700 text-neutral-100"
               placeholder="Name" />
             <textarea id="modalContent"
-              class="w-full p-3 rounded-2xl bg-neutral-800 border border-neutral-700 hidden h-32 text-neutral-100"
+              class="w-full p-3 rounded-md bg-neutral-800 border border-neutral-700 hidden h-32 text-neutral-100"
               placeholder="Content (for file)"></textarea>
           </div>
 
@@ -284,7 +284,7 @@
     <div id="editorModalOverlay"
       class="fixed inset-0 bg-black bg-neutral-950/50 backdrop-blur-sm hidden flex items-center justify-center z-60">
       <div id="editorModal" role="dialog" aria-modal="true" aria-labelledby="editorModalTitle"
-        class="relative z-10 w-[95%] max-w-6xl mx-4 rounded-2xl bg-neutral-900 text-neutral-100 shadow-xl ring-1 ring-black/10 overflow-hidden transform transition-all duration-200 ease-out scale-95 opacity-0">
+        class="relative z-10 w-[95%] max-w-6xl mx-4 rounded-md bg-neutral-900 text-neutral-100 shadow-xl ring-1 ring-black/10 overflow-hidden transform transition-all duration-200 ease-out scale-95 opacity-0">
         <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
           <div class="flex items-center gap-3">
             <h3 id="editorModalTitle" class="text-lg font-semibold">Edit file</h3>
@@ -314,7 +314,7 @@
     <!-- Upload Modal -->
     <div id="uploadModal"
       class="fixed inset-0 bg-black bg-opacity-50 hidden flex flex-col items-center justify-center z-50 p-6">
-      <h2 class="text-2xl font-bold mb-4 text-white">Uploading Files...</h2>
+      <h2 class="text-md font-bold mb-4 text-white">Uploading Files...</h2>
       <div class="w-full max-w-lg bg-neutral-800 rounded-xl overflow-hidden h-6 mb-2">
         <div id="uploadBar" class="bg-green-500 h-6 w-0"></div>
       </div>
@@ -324,7 +324,7 @@
     <!-- DELETE PROGRESS MODAL -->
     <div id="deleteProgressModal"
       class="fixed inset-0 bg-black bg-neutral-900/50 hidden flex items-center justify-center z-60 p-6" aria-hidden="true">
-      <div class="w-full max-w-2xl bg-neutral-950 rounded-2xl p-6 shadow-lg">
+      <div class="w-full max-w-md bg-neutral-950 rounded-md p-6 shadow-lg">
         <div class="flex items-start justify-between gap-4">
           <div>
             <h3 id="deleteProgressTitle" class="text-lg font-semibold text-gray-100">Deleting files</h3>
@@ -357,7 +357,7 @@
       class="fixed inset-x-0 bottom-6 z-50 translate-y-32 opacity-0 pointer-events-none transition-all duration-300 flex justify-center">
 
       <div
-        class="w-full max-w-3xl mx-4 bg-neutral-900 border border-neutral-800 rounded-2xl px-4 py-3 shadow-lg flex items-center justify-between gap-4">
+        class="w-full max-w-3xl mx-4 bg-neutral-900 border border-neutral-800 rounded-md px-4 py-3 shadow-lg flex items-center justify-between gap-4">
 
         <div class="flex items-center gap-3">
           <div class="flex flex-col">
@@ -910,7 +910,7 @@
         const contextMenu = document.createElement('div');
         contextMenu.id = 'context-menu';
         contextMenu.className =
-          'dropdownMenu transition-all scale-95 opacity-0 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-lg hidden flex flex-col z-50 min-w-[140px] fixed';
+          'dropdownMenu transition-all scale-95 opacity-0 bg-neutral-900 border border-neutral-800 rounded-md shadow-lg hidden flex flex-col z-50 min-w-[140px] fixed';
         contextMenu.style.right = 'auto';
         contextMenu.style.left = '0px';
         contextMenu.style.top = '0px';

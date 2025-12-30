@@ -479,16 +479,15 @@
 
             csws();
 
-            // Send command button
-            document.getElementById("sendBtn").addEventListener("click", () => {
-              const input = document.getElementById("cmdInput");
-              const cmd = input.value.trim();
+            function sendConsoleCommand(cmd) {
               if (
                 !cmd ||
                 typeof consoleWs === "undefined" ||
                 consoleWs.readyState !== WebSocket.OPEN
-              )
+              ) {
+                addLog("ERROR", "Cannot send command: WebSocket not connected or empty command.");
                 return;
+              }
 
               consoleWs.send(
                 JSON.stringify({
@@ -496,8 +495,16 @@
                   payload: { containerId, command: cmd },
                 })
               );
-              input.value = "";
+
               addLog("COMMAND", cmd);
+            }
+
+            // Attach it to your send button
+            document.getElementById("sendBtn").addEventListener("click", () => {
+              const input = document.getElementById("cmdInput");
+              const cmd = input.value.trim();
+              sendConsoleCommand(cmd);
+              input.value = "";
             });
 
             document
@@ -638,6 +645,10 @@
               try {
                 if (action === "start" || action === "restart") {
                   logContainer.innerHTML = ""
+                }
+                if (action === "stop") {
+                  sendConsoleCommand('<%= server.image.stopCmd %>');
+                  return;
                 }
                 if (
                   typeof consoleWs !== "undefined" &&
