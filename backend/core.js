@@ -213,16 +213,22 @@ router.get("/admin/node/:id", requireAuth, requireAdmin, async (req, res) => {
     node.status = status;
   }
 
-  const response = await fetch(
-    `http://${node.ip}:${node.port}/stats?key=${node.key}`
-  );
+  let stats = null;
 
-  let data = {};
-  if (response.ok) {
-    data = await response.json();
+  try {
+    const response = await fetch(
+      `http://${node.ip}:${node.port}/stats?key=${node.key}`,
+      { timeout: 3000 }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      stats = data.stats;
+    }
+  } catch (err) {
+    stats = null;
   }
 
-  const stats = data.stats;
 
   if (stats?.totalCpuCores && stats?.totalRamGB) {
     const totalRamGB = Number(stats.totalRamGB);
