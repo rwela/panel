@@ -36,7 +36,7 @@
   <%- include('../../components/sidebar', { name, user }) %>
 
     <main class="relative flex-1 overflow-y-auto bg-black">
-      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12">
+      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12 animate-fade-in-up">
 
         <!-- Back Link -->
         <a href="/admin/servers"
@@ -49,7 +49,7 @@
         </a>
 
         <!-- Header -->
-        <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end animate-fade-in-up delay-100">
           <div>
             <div class="flex items-center gap-4">
               <h1 class="text-3xl font-bold tracking-tight text-white md:text-4xl">
@@ -57,7 +57,7 @@
               </h1>
               <% if (server.suspended) { %>
                 <span
-                  class="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-bold text-red-500 ring-1 ring-inset ring-red-500/20">Suspended</span>
+                  class="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-bold text-red-500 ring-1 ring-inset ring-red-500/20 animate-pulse">Suspended</span>
                 <% } else { %>
                   <span
                     class="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-500 ring-1 ring-inset ring-emerald-500/20">Active</span>
@@ -72,7 +72,7 @@
 
           <div class="flex flex-wrap gap-3">
             <button onclick="toggleSuspend('<%= server.id %>', '<%= server.suspended %>')"
-              class="flex items-center gap-2 rounded-lg bg-neutral-900 border border-neutral-800 px-5 py-2.5 text-sm font-bold text-white transition-transform hover:bg-neutral-800 active:scale-[0.98]">
+              class="flex items-center gap-2 rounded-lg bg-neutral-900 border border-neutral-800 px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-neutral-800 hover:scale-105 active:scale-95">
               <% if(server.suspended) { %>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                   stroke="currentColor" class="h-4 w-4">
@@ -91,7 +91,7 @@
             </button>
 
             <a href="/admin/server/edit/<%= server.id %>"
-              class="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-black transition-transform hover:scale-[1.02] hover:bg-neutral-200 active:scale-[0.98]">
+              class="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-black transition-all hover:bg-neutral-200 hover:scale-105 active:scale-95">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-4 w-4">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -101,7 +101,7 @@
             </a>
 
             <button onclick="deleteServer('<%= server.id %>')"
-              class="flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-bold text-white transition-transform hover:scale-[1.02] hover:bg-red-700 active:scale-[0.98]">
+              class="flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-red-700 hover:scale-105 active:scale-95">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-4 w-4">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -116,7 +116,7 @@
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
           <!-- Resources -->
-          <div class="rounded-2xl border border-neutral-900 bg-neutral-950 p-6">
+          <div class="rounded-2xl border border-neutral-900 bg-neutral-950 p-6 animate-scale-in delay-200">
             <h2 class="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Resources</h2>
             <div class="space-y-4">
               <div class="flex items-center justify-between">
@@ -173,7 +173,7 @@
           </div>
 
           <!-- Ownership -->
-          <div class="rounded-2xl border border-neutral-900 bg-neutral-950 p-6">
+          <div class="rounded-2xl border border-neutral-900 bg-neutral-950 p-6 animate-scale-in delay-300">
             <h2 class="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Ownership & Image</h2>
             <div class="space-y-4">
               <div class="flex items-center justify-between">
@@ -211,7 +211,7 @@
           </div>
 
           <!-- Quick Actions -->
-          <div class="rounded-2xl border border-neutral-900 bg-neutral-950 p-6">
+          <div class="rounded-2xl border border-neutral-900 bg-neutral-950 p-6 animate-scale-in delay-400">
             <h2 class="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Identifier</h2>
             <div class="space-y-4">
               <div class="space-y-2">

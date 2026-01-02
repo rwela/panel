@@ -67,7 +67,7 @@
       <div class="mx-auto max-w-7xl px-6 py-12 md:px-12">
 
         <!-- Header Area -->
-        <div class="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div class="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-end animate-fade-in-up">
           <div>
             <div class="flex items-center gap-3">
               <h1 class="text-3xl font-bold tracking-tight text-white md:text-4xl">
@@ -118,7 +118,7 @@
           <!-- Power Controls -->
           <div id="power-actions" class="flex items-center gap-3">
             <button data-action="start" disabled
-              class="flex items-center gap-2 rounded-xl bg-emerald-900/20 border border-emerald-900/50 px-5 py-2.5 text-sm font-bold text-emerald-500 transition-all hover:bg-emerald-900/40 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="flex items-center gap-2 rounded-xl bg-emerald-900/20 border border-emerald-900/50 px-5 py-2.5 text-sm font-bold text-emerald-500 transition-all hover:bg-emerald-900/40 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-5 w-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -127,7 +127,7 @@
               Start
             </button>
             <button data-action="restart" disabled
-              class="flex items-center gap-2 rounded-xl bg-neutral-800 border border-neutral-700 px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="flex items-center gap-2 rounded-xl bg-neutral-800 border border-neutral-700 px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-neutral-700 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-5 w-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -136,7 +136,7 @@
               Restart
             </button>
             <button data-action="stop" disabled
-              class="flex items-center gap-2 rounded-xl bg-red-900/20 border border-red-900/50 px-5 py-2.5 text-sm font-bold text-red-500 transition-all hover:bg-red-900/40 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="flex items-center gap-2 rounded-xl bg-red-900/20 border border-red-900/50 px-5 py-2.5 text-sm font-bold text-red-500 transition-all hover:bg-red-900/40 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-5 w-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -148,7 +148,8 @@
         </div>
 
         <!-- Node Down Alert -->
-        <div id="systemnodedown" class="mb-6 hidden rounded-xl border border-red-900/50 bg-red-950/20 p-4 text-red-200">
+        <div id="systemnodedown"
+          class="mb-6 hidden rounded-xl border border-red-900/50 bg-red-950/20 p-4 text-red-200 animate-slide-in-right">
           <div class="flex items-center gap-3">
             <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none"
               viewBox="0 0 24 24">
@@ -164,7 +165,7 @@
 
           <!-- Terminal (Takes up 2 cols on Large screens) -->
           <div
-            class="flex flex-col rounded-2xl border border-neutral-900 bg-[#0e0e0e] lg:col-span-2 overflow-hidden h-[500px]">
+            class="flex flex-col rounded-2xl border border-neutral-900 bg-[#0e0e0e] lg:col-span-2 overflow-hidden h-[500px] animate-scale-in delay-100 shadow-2xl">
             <!-- Terminal Header -->
             <div class="flex items-center justify-between border-b border-neutral-900 bg-neutral-950 px-4 py-2">
               <div class="flex items-center gap-2">
@@ -201,7 +202,8 @@
                 <span class="text-emerald-500 font-bold">➜</span>
                 <input id="cmdInput" type="text" placeholder="Type a command..."
                   class="flex-1 bg-transparent text-sm text-white placeholder-neutral-600 outline-none font-mono" />
-                <button id="sendBtn" class="p-1 text-neutral-400 hover:text-white transition-colors">
+                <button id="sendBtn"
+                  class="p-1 text-neutral-400 hover:text-white transition-colors hover:scale-110 active:scale-95">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="h-5 w-5">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -216,7 +218,8 @@
           <div class="flex flex-col gap-6 lg:h-[500px]">
 
             <!-- Usage Chart -->
-            <div class="flex-1 rounded-2xl border border-neutral-900 bg-neutral-950 p-6 flex flex-col">
+            <div
+              class="flex-1 rounded-2xl border border-neutral-900 bg-neutral-950 p-6 flex flex-col animate-scale-in delay-200 shadow-xl">
               <h3 class="mb-4 text-sm font-bold uppercase tracking-wider text-neutral-500">Resource Usage</h3>
               <div class="relative flex-1 w-full min-h-[200px]">
                 <canvas id="usageChart"></canvas>
@@ -406,8 +409,11 @@
           // --- WebSockets ---
           let consoleWs, statsWs;
 
+          let lastMsg = null;
+          let lastMsgTime = 0;
+
           function connectConsole() {
-            if (consoleWs && consoleWs.readyState === WebSocket.OPEN) return;
+            if (consoleWs && (consoleWs.readyState === WebSocket.OPEN || consoleWs.readyState === WebSocket.CONNECTING)) return;
             consoleWs = new WebSocket(`${protocol}://${window.location.hostname}:${window.location.port}/console/${serverId}`);
 
             consoleWs.onmessage = (evt) => {
@@ -435,6 +441,15 @@
               } else {
                 if (data.payload) {
                   const p = typeof data.payload === 'string' ? data.payload : JSON.stringify(data.payload);
+
+                  // Simple deduplication for exact duplicates within 200ms
+                  const now = Date.now();
+                  if (p === lastMsg && (now - lastMsgTime) < 200) {
+                    return;
+                  }
+                  lastMsg = p;
+                  lastMsgTime = now;
+
                   termWrite(p);
                 }
               }

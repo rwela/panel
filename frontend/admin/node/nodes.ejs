@@ -35,7 +35,7 @@
   <%- include('../../components/sidebar', { name, user }) %>
 
     <main class="relative flex-1 overflow-y-auto bg-black">
-      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12">
+      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12 animate-fade-in-up">
 
         <!-- Header -->
         <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
@@ -45,7 +45,7 @@
           </div>
           <div>
             <button onclick="openCreateModal()"
-              class="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-black transition-transform active:scale-95 hover:bg-neutral-200">
+              class="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-black transition-transform active:scale-95 hover:bg-neutral-200 hover:scale-105">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-5 w-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -58,15 +58,15 @@
         <!-- Nodes Grid -->
         <% if (nodes && nodes.length> 0) { %>
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <% nodes.forEach(node=> { %>
-              <div
-                class="group relative flex flex-col justify-between rounded-2xl border border-neutral-900 bg-neutral-950 p-6 transition-all hover:-translate-y-1 hover:border-neutral-700 hover:shadow-xl hover:shadow-neutral-900/20">
+            <% nodes.forEach((node, index)=> { %>
+              <div style="animation-delay: <%= Math.min(index * 50, 500) %>ms;"
+                class="animate-fade-in-up group relative flex flex-col justify-between rounded-2xl border border-neutral-900 bg-neutral-950 p-6 transition-all hover:-translate-y-2 hover:border-neutral-700 hover:shadow-2xl hover:shadow-neutral-900/40">
 
                 <!-- Card Header -->
                 <div class="mb-6 flex items-start justify-between">
                   <div class="flex items-center gap-4">
                     <div
-                      class="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 text-neutral-400 group-hover:bg-white group-hover:text-black transition-colors">
+                      class="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 text-neutral-400 transition-all duration-300 group-hover:bg-white group-hover:scale-110 group-hover:text-black">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="h-6 w-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -74,7 +74,7 @@
                       </svg>
                     </div>
                     <div>
-                      <h3 class="text-lg font-bold text-white">
+                      <h3 class="text-lg font-bold text-white transition-colors group-hover:text-neutral-200">
                         <%= node.name %>
                       </h3>
                       <div class="flex items-center gap-2 text-xs text-neutral-500">
@@ -93,7 +93,7 @@
                       <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                     </div>
                     <% } else if (node.status==="dockernotrunning" ) { %>
-                      <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+                      <div class="h-3 w-3 rounded-full bg-yellow-500 animate-pulse"></div>
                       <% } else { %>
                         <div class="h-3 w-3 rounded-full bg-red-500"></div>
                         <% } %>
@@ -101,13 +101,13 @@
 
                 <!-- Stats -->
                 <div class="mb-6 grid grid-cols-2 gap-4">
-                  <div class="rounded-lg bg-neutral-900/40 p-3">
+                  <div class="rounded-lg bg-neutral-900/40 p-3 transition-colors group-hover:bg-neutral-900">
                     <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Cores</p>
                     <p class="font-mono text-sm text-white">
                       <%= node.core %>
                     </p>
                   </div>
-                  <div class="rounded-lg bg-neutral-900/40 p-3">
+                  <div class="rounded-lg bg-neutral-900/40 p-3 transition-colors group-hover:bg-neutral-900">
                     <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">RAM</p>
                     <p class="font-mono text-sm text-white">
                       <%= node.ram %> MB
@@ -125,11 +125,11 @@
                 <!-- Actions -->
                 <div class="flex items-center gap-2">
                   <a href="/admin/node/<%= node.id %>"
-                    class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-neutral-100 px-4 py-2 text-sm font-bold text-black transition-transform active:scale-95 hover:bg-white">
+                    class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-neutral-100 px-4 py-2 text-sm font-bold text-black transition-all active:scale-95 hover:bg-white hover:scale-[1.02]">
                     Manage
                   </a>
                   <a href="/admin/node/<%= node.id %>/edit"
-                    class="flex items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+                    class="flex items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-neutral-400 hover:bg-neutral-800 hover:text-white hover:scale-110 active:scale-95 transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="h-4 w-4">
                       <path stroke-linecap="round" stroke-linejoin="round"
@@ -139,7 +139,7 @@
                   <form action="/admin/node/<%= node.id %>/delete" method="POST"
                     onsubmit="return confirm('Start deleting node <%= node.name %>? This will delete all associated servers.')">
                     <button type="submit"
-                      class="flex items-center justify-center rounded-lg border border-red-900/30 bg-red-900/10 px-3 py-2 text-red-500 hover:bg-red-900/20 hover:text-red-400 transition-colors">
+                      class="flex items-center justify-center rounded-lg border border-red-900/30 bg-red-900/10 px-3 py-2 text-red-500 hover:bg-red-900/20 hover:text-red-400 hover:scale-110 active:scale-95 transition-all">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="h-4 w-4">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -148,14 +148,13 @@
                     </button>
                   </form>
                 </div>
-
               </div>
               <% }) %>
           </div>
           <% } else { %>
             <!-- Empty State -->
             <div
-              class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-800 bg-neutral-950/30 py-24 text-center">
+              class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-800 bg-neutral-950/30 py-24 text-center animate-scale-in">
               <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                   stroke="currentColor" class="h-8 w-8 text-neutral-500">
