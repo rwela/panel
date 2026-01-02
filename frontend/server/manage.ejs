@@ -394,11 +394,9 @@
           new ResizeObserver(() => fitAddon.fit()).observe(document.getElementById('terminal'));
 
           // Banner
-          term.writeln('\x1b[1;32mWelcome to the console!\x1b[0m');
           term.writeln('Connecting to socket...');
 
           function termWrite(msg) {
-            // Handle CRLF for proper line endings if backend sends only LF
             if (msg.includes && !msg.includes('\r')) {
               term.write(msg.replace(/\n/g, '\r\n'));
             } else {
@@ -467,7 +465,6 @@
             statsWs = new WebSocket(`${protocol}://${window.location.hostname}:${window.location.port}/stats/${serverId}`);
 
             statsWs.onmessage = (evt) => {
-              // Got stats -> connection alive
               if (loadingOverlay) {
                 loadingOverlay.style.opacity = '0';
                 setTimeout(() => loadingOverlay.classList.add('hidden'), 300);
@@ -615,9 +612,7 @@
             const input = document.getElementById("cmdInput");
             const cmd = input.value.trim();
             if (!cmd || !consoleWs || consoleWs.readyState !== WebSocket.OPEN) return;
-
             consoleWs.send(JSON.stringify({ event: "cmd", payload: { containerId, command: cmd } }));
-            addLog("CMD", `\u001b[1m> ${cmd}\u001b[0m`);
             input.value = "";
           }
 

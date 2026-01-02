@@ -120,7 +120,7 @@
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
             </svg>
-            <a href="?path=/" class="hover:text-white transition-colors">/home/container</a>
+            <a href="?path=/" class="hover:text-white transition-colors">/talon/<%= server.id %></a>
             <% const pathParts=path.split('/').filter(Boolean); let accumulatedPath='' ; %>
               <% pathParts.forEach((part, index)=> { accumulatedPath += '/' + part; %>
                 <span class="text-neutral-600">/</span>
@@ -167,6 +167,7 @@
               </tr>
             </thead>
             <tbody id="filesTbody" class="divide-y divide-neutral-900">
+              
               <% const sortedFiles=files.sort((a,b)=> (a.type === 'folder' && b.type !== 'folder') ? -1 : (a.type !==
                 'folder' && b.type === 'folder') ? 1 : 0);
                 sortedFiles.forEach((file, index) => {
@@ -703,7 +704,22 @@
       };
       document.getElementById("uploadFileBtn").onclick = () => uploadInput.click();
 
-      // Delete Selected
+      let cancelDelete = false;
+
+      const closeDeleteModal = () => {
+        const modal = document.getElementById("deleteProgressModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      };
+      document.getElementById("deleteProgressClose").onclick = () => {
+        cancelDelete = true;
+        closeDeleteModal();
+      };
+
+      document.getElementById("deleteProgressCancel").onclick = () => {
+        cancelDelete = true;
+      };
+
       document.getElementById("deleteSelectedBtn").onclick = async () => {
         const selected = Array.from(document.querySelectorAll(".row-checkbox:checked"))
           .map(cb => ({
@@ -711,22 +727,39 @@
             type: cb.closest('tr').dataset.type
           }));
 
+        if (!selected.length) return;
         if (!confirm(`Delete ${selected.length} items?`)) return;
+
+        cancelDelete = false;
 
         const modal = document.getElementById("deleteProgressModal");
         modal.classList.remove("hidden");
         modal.classList.add("flex");
+
         const bar = document.getElementById("deleteProgressBar");
+        const current = document.getElementById("deleteProgressCurrent");
+        const label = document.getElementById("deleteProgressLabel");
 
         for (let i = 0; i < selected.length; i++) {
-          document.getElementById("deleteProgressCurrent").textContent = selected[i].path;
-          document.getElementById("deleteProgressLabel").textContent = `${i + 1}/${selected.length}`;
+          if (cancelDelete) break;
+
+          current.textContent = selected[i].path;
+          label.textContent = `${i + 1}/${selected.length}`;
           bar.style.width = `${((i + 1) / selected.length) * 100}%`;
 
-          await fetch(`/server/files/<%= server.id %>/${selected[i].type}/delete?location=${encodeURIComponent(selected[i].path)}`, { method: "POST" });
+          await fetch(
+            `/server/files/<%= server.id %>/${selected[i].type}/delete?location=${encodeURIComponent(selected[i].path)}`,
+            { method: "POST" }
+          );
         }
-        location.reload();
+
+        closeDeleteModal();
+
+        if (!cancelDelete) {
+          location.reload();
+        }
       };
+
 
     </script>
 </body>

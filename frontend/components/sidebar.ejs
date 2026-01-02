@@ -18,21 +18,11 @@
   <!-- Header / Brand -->
   <div class="flex h-20 shrink-0 items-center px-6">
     <a href="/dashboard" class="flex items-center gap-3 group">
-      <% if (typeof config !=='undefined' && config.logo) { %>
         <img src="<%= config.logo %>" alt="Logo"
-          class="h-8 w-8 object-contain brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity">
-        <% } else { %>
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-900">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="w-5 h-5 text-white">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M21 7.5l-9-5.25-9 5.25m18 0l-9 5.25-9-5.25m18 0L12 21l-9-5.25" />
-            </svg>
-          </div>
-          <% } %>
+          class="h-8 w-8 object-contain opacity-90 group-hover:opacity-100 transition-opacity">
             <span
               class="font-space-grotesk text-lg font-bold tracking-tight text-white group-hover:text-neutral-200 transition-colors">
-              <%= typeof name !=='undefined' ? name : 'Console' %>
+              <%= typeof name !=='undefined' ? name : 'Talorix' %>
             </span>
     </a>
   </div>

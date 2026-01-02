@@ -108,7 +108,7 @@ const Logger = require("../modules/logger.js");
         const { dockerImage, name, description, envs, files, features, stopCmd } =
           imageData;
 
-        if (!dockerImage || !name || !stopCmd) continue;
+        if (!dockerImage || !name) continue;
 
         const existingImage = unsqh
           .list("images")
@@ -121,7 +121,6 @@ const Logger = require("../modules/logger.js");
           envs: envs || {},
           files: files || [],
           features: Array.isArray(features) ? features : [],
-          stopCmd: stopCmd || "",
         };
 
         if (existingImage) {
@@ -134,9 +133,7 @@ const Logger = require("../modules/logger.js");
             JSON.stringify(existingImage.files || []) ===
               JSON.stringify(normalized.files) &&
             JSON.stringify(existingImage.features || []) ===
-              JSON.stringify(normalized.features) &&
-            JSON.stringify(existingImage.stopCmd || "") ===
-              JSON.stringify(normalized.stopCmd);
+              JSON.stringify(normalized.features);
           if (identical) {
             skippedImages.push(name);
             continue;
