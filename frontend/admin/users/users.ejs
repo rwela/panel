@@ -35,7 +35,7 @@
   <%- include('../../components/sidebar', { name, user }) %>
 
     <main class="relative flex-1 overflow-y-auto bg-black">
-      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12">
+      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12 animate-fade-in-up">
 
         <!-- Header -->
         <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
@@ -43,9 +43,23 @@
             <h1 class="text-3xl font-bold tracking-tight text-white md:text-4xl">Users</h1>
             <p class="mt-2 text-neutral-400">Manage registered users and permissions.</p>
           </div>
-          <div>
+          <div class="flex items-center gap-4">
+            <!-- Search Input -->
+            <div class="relative group">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor"
+                  class="h-5 w-5 text-neutral-500 group-focus-within:text-white transition-colors">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+              </div>
+              <input type="text" id="searchInput" placeholder="Search users..."
+                class="block w-full rounded-xl border border-neutral-800 bg-neutral-900/50 py-2.5 pl-11 pr-4 text-sm text-white placeholder-neutral-500 outline-none ring-0 transition-all focus:border-neutral-700 focus:bg-neutral-900 focus:ring-1 focus:ring-neutral-700 md:w-64" />
+            </div>
+
             <button onclick="openCreateModal()"
-              class="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-black transition-transform active:scale-95 hover:bg-neutral-200">
+              class="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-black transition-transform active:scale-95 hover:bg-neutral-200 hover:scale-105">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-5 w-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -56,92 +70,132 @@
           </div>
         </div>
 
-        <!-- Users Grid -->
-        <% if (users && users.length> 0) { %>
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <% users.forEach(u=> { %>
-              <div
-                class="group relative flex flex-col justify-between rounded-2xl border border-neutral-900 bg-neutral-950 p-6 transition-all hover:-translate-y-1 hover:border-neutral-700 hover:shadow-xl hover:shadow-neutral-900/20">
-
-                <div class="mb-6 flex items-start justify-between">
-                  <div class="flex items-center gap-4">
-                    <img
-                      src="https://api.dicebear.com/9.x/notionists-neutral/svg?seed=<%= u.username %>&backgroundColor=transparent"
-                      alt="Avatar" class="h-12 w-12 rounded-xl bg-neutral-900 object-cover p-1">
-                    <div>
-                      <h3 class="text-lg font-bold text-white">
-                        <%= u.username %>
-                      </h3>
-                      <div class="flex items-center gap-2 text-xs text-neutral-500">
-                        <span class="truncate max-w-[150px]">
-                          <%= u.email %>
+        <!-- Users Table -->
+        <div class="overflow-hidden rounded-2xl border border-neutral-900 bg-neutral-950 shadow-2xl">
+          <table class="w-full text-left text-sm">
+            <thead class="border-b border-neutral-900 bg-neutral-900/50 text-neutral-400">
+              <tr>
+                <th class="px-6 py-4 font-medium">User</th>
+                <th class="px-6 py-4 font-medium">Role</th>
+                <th class="px-6 py-4 font-medium">Servers</th>
+                <th class="px-6 py-4 text-right font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-900" id="usersTableBody">
+              <% if (users && users.length> 0) { %>
+                <% users.forEach((u, index)=> { %>
+                  <tr class="group hover:bg-neutral-900/40 transition-colors user-row animate-fade-in-up"
+                    style="animation-delay: <%= Math.min(index * 50, 500) %>ms;"
+                    data-username="<%= u.username.toLowerCase() %>" data-email="<%= u.email.toLowerCase() %>">
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-4">
+                        <img
+                          src="https://api.dicebear.com/9.x/notionists-neutral/svg?seed=<%= u.username %>&backgroundColor=transparent"
+                          alt="Avatar"
+                          class="h-10 w-10 rounded-lg bg-neutral-900 object-cover p-1 transition-transform group-hover:scale-110">
+                        <div>
+                          <div class="font-bold text-white">
+                            <%= u.username %>
+                          </div>
+                          <div class="text-xs text-neutral-500">
+                            <%= u.email %>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <% if (u.admin) { %>
+                        <span
+                          class="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 px-2.5 py-1 text-xs font-bold text-indigo-400 border border-indigo-500/20">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            class="w-3 h-3">
+                            <path fill-rule="evenodd"
+                              d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z"
+                              clip-rule="evenodd" />
+                          </svg>
+                          Admin
+                        </span>
+                        <% } else { %>
+                          <span
+                            class="inline-flex items-center rounded-full bg-neutral-800 px-2.5 py-1 text-xs font-medium text-neutral-400 border border-neutral-700">
+                            User
+                          </span>
+                          <% } %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2 text-neutral-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="h-5 w-5 text-neutral-500">
+                          <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+                          <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+                          <line x1="6" x2="6.01" y1="6" y2="6" />
+                          <line x1="6" x2="6.01" y1="18" y2="18" />
+                        </svg>
+                        <span class="font-mono text-white">
+                          <%= u.servers?.length || 0 %>
                         </span>
                       </div>
-                    </div>
-                  </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <a href="/admin/user/<%= u.id %>"
+                          class="group/btn relative flex items-center justify-center rounded-lg bg-neutral-900 border border-neutral-800 p-2 text-neutral-400 hover:bg-white hover:text-black transition-all hover:scale-110 active:scale-95"
+                          title="View Profile">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="M2 21a8 8 0 0 1 13.292-6" />
+                            <circle cx="10" cy="8" r="5" />
+                            <path d="M19 16v6" />
+                            <path d="M22 19h-6" />
+                          </svg>
+                        </a>
+                        <a href="/admin/user/<%= u.id %>/edit"
+                          class="group/btn relative flex items-center justify-center rounded-lg bg-neutral-900 border border-neutral-800 p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-all hover:scale-110 active:scale-95"
+                          title="Edit User">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                          </svg>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }) %>
+                    <% } else { %>
+                      <tr>
+                        <td colspan="4" class="px-6 py-24 text-center">
+                          <div class="flex flex-col items-center justify-center">
+                            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="h-6 w-6 text-neutral-500">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                              </svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-white">No Users Found</h3>
+                            <p class="mt-1 text-xs text-neutral-500">There are no registered users at the moment.</p>
+                          </div>
+                        </td>
+                      </tr>
+                      <% } %>
+            </tbody>
+          </table>
 
-                  <% if (u.admin) { %>
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-900/20 text-indigo-400"
-                      title="Administrator">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-5 w-5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                      </svg>
-                    </div>
-                    <% } %>
-                </div>
-
-                <!-- Stats -->
-                <div class="mb-6 grid grid-cols-2 gap-4">
-                  <div class="rounded-lg bg-neutral-900/40 p-3">
-                    <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Role</p>
-                    <p class="text-sm font-bold text-white">
-                      <%= u.admin ? 'Administrator' : 'User' %>
-                    </p>
-                  </div>
-                  <div class="rounded-lg bg-neutral-900/40 p-3">
-                    <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Servers</p>
-                    <p class="font-mono text-sm text-white">
-                      <%= u.servers?.length || 0 %>
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex items-center gap-2">
-                  <a href="/admin/user/<%= u.id %>"
-                    class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-neutral-100 px-4 py-2 text-sm font-bold text-black transition-transform active:scale-95 hover:bg-white">
-                    View Profile
-                  </a>
-                  <a href="/admin/user/<%= u.id %>/edit"
-                    class="flex items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                      stroke="currentColor" class="h-4 w-4">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
-                    </svg>
-                  </a>
-                </div>
-
-              </div>
-              <% }) %>
-          </div>
-          <% } else { %>
-            <!-- Empty State -->
-            <div
-              class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-800 bg-neutral-950/30 py-24 text-center">
-              <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                  stroke="currentColor" class="h-8 w-8 text-neutral-500">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
-              </div>
-              <h3 class="text-xl font-bold text-white">No Users Found</h3>
-              <p class="mt-2 max-w-sm text-neutral-500">No users have been registered yet.</p>
+          <!-- Empty State for Search (Hidden by default) -->
+          <div id="noSearchResults" class="hidden flex-col items-center justify-center py-24 text-center">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="h-6 w-6 text-neutral-500">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
             </div>
-            <% } %>
+            <h3 class="text-sm font-bold text-white">No Matches Found</h3>
+            <p class="mt-1 text-xs text-neutral-500">Try adjusting your search terms.</p>
+          </div>
+        </div>
 
       </div>
     </main>
@@ -202,6 +256,41 @@
     </div>
 
     <script>
+      // Search Functionality
+      document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('searchInput');
+        const rows = document.querySelectorAll('.user-row');
+        const noResults = document.getElementById('noSearchResults');
+        const tableBody = document.getElementById('usersTableBody');
+
+        searchInput.addEventListener('input', (e) => {
+          const term = e.target.value.toLowerCase().trim();
+          let hasVisible = false;
+
+          rows.forEach(row => {
+            const username = row.dataset.username || '';
+            const email = row.dataset.email || '';
+
+            if (username.includes(term) || email.includes(term)) {
+              row.style.display = '';
+              hasVisible = true;
+            } else {
+              row.style.display = 'none';
+            }
+          });
+
+          // Toggle Empty State
+          if (!hasVisible && rows.length > 0) {
+            noResults.classList.remove('hidden');
+            noResults.classList.add('flex');
+            // Hide header if no results? optional style choice. keeping header visible.
+          } else {
+            noResults.classList.add('hidden');
+            noResults.classList.remove('flex');
+          }
+        });
+      });
+
       const modal = document.getElementById("createModal");
       const modalContent = document.getElementById("modalContent");
 
@@ -241,7 +330,6 @@
         else alert("Failed to create user");
       }
     </script>
-
 </body>
 
 </html>

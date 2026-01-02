@@ -31,11 +31,10 @@
 </head>
 
 <body class="flex h-full w-full overflow-hidden">
-
   <%- include('../../components/sidebar', { name, user }) %>
 
     <main class="relative flex-1 overflow-y-auto bg-black">
-      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12">
+      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12 animate-fade-in-up">
 
         <!-- Header -->
         <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
@@ -43,136 +42,264 @@
             <h1 class="text-3xl font-bold tracking-tight text-white md:text-4xl">Servers</h1>
             <p class="mt-2 text-neutral-400">View and manage all user servers.</p>
           </div>
-          <div>
+          <div class="flex items-center gap-4">
+            <!-- Search Input -->
+            <div class="relative group">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="h-5 w-5 text-neutral-500 group-focus-within:text-white transition-colors">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+              </div>
+              <input type="text" id="searchInput" placeholder="Search by User, Email or ID..."
+                class="block w-full rounded-xl border border-neutral-800 bg-neutral-900/50 py-2.5 pl-11 pr-4 text-sm text-white placeholder-neutral-500 outline-none ring-0 transition-all focus:border-neutral-700 focus:bg-neutral-900 focus:ring-1 focus:ring-neutral-700 md:w-72" />
+            </div>
+
             <a href="/admin/servers/new"
-              class="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-black transition-transform active:scale-95 hover:bg-neutral-200">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="h-5 w-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              class="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-black transition-transform active:scale-95 hover:bg-neutral-200 hover:scale-105">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
               </svg>
               Create Server
             </a>
           </div>
         </div>
 
-        <!-- Servers Grid -->
-        <% if (servers && servers.length> 0) { %>
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <% servers.forEach(server=> {
-              const owner = users.find(u => u.id === server.userId);
-              %>
-              <div
-                class="group relative flex flex-col justify-between rounded-2xl border border-neutral-900 bg-neutral-950 p-6 transition-all hover:-translate-y-1 hover:border-neutral-700 hover:shadow-xl hover:shadow-neutral-900/20">
+        <!-- Servers Table -->
+        <div class="overflow-hidden rounded-2xl border border-neutral-900 bg-neutral-950 shadow-2xl">
+          <table class="w-full text-left text-sm">
+            <thead class="border-b border-neutral-900 bg-neutral-900/50 text-neutral-400">
+              <tr>
+                <th class="px-6 py-4 font-medium">Server</th>
+                <th class="px-6 py-4 font-medium">Owner</th>
+                <th class="px-6 py-4 font-medium">Status</th>
+                <th class="px-6 py-4 font-medium">Node</th>
+                <th class="px-6 py-4 text-right font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-900" id="serversTableBody">
+              <% if (servers && servers.length> 0) { %>
+                <% servers.forEach((server, index)=> {
+                  const owner = users.find(u => u.id === server.userId);
+                  const ownerName = owner ? owner.username.toLowerCase() : 'unknown';
+                  const ownerEmail = owner ? owner.email.toLowerCase() : '';
+                  %>
+                  <tr class="group hover:bg-neutral-900/40 transition-colors server-row animate-fade-in-up"
+                    style="animation-delay: <%= Math.min(index * 50, 500) %>ms;"
+                    data-server-name="<%= server.name.toLowerCase() %>" data-server-id="<%= server.id.toLowerCase() %>"
+                    data-owner-name="<%= ownerName %>" data-owner-email="<%= ownerEmail %>">
 
-                <div class="mb-6 flex items-start justify-between">
-                  <div class="flex items-center gap-4">
-                    <div
-                      class="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 text-white group-hover:bg-white group-hover:text-black transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-6 w-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 class="text-lg font-bold text-white">
-                        <%= server.name %>
-                      </h3>
-                      <div class="flex items-center gap-1 text-xs text-neutral-500">
-                        <span>Owned by</span>
-                        <span class="font-medium text-white">
-                          <%= owner ? owner.username : 'Unknown' %>
+                    <!-- Server Name & ID -->
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-4">
+                        <div
+                          class="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-900 text-neutral-400 group-hover:bg-white group-hover:text-black transition-all">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                            <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+                            <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+                            <line x1="6" x2="6.01" y1="6" y2="6" />
+                            <line x1="6" x2="6.01" y1="18" y2="18" />
+                          </svg>
+                        </div>
+                        <div>
+                          <div class="font-bold text-white">
+                            <%= server.name %>
+                          </div>
+                          <div class="font-mono text-xs text-neutral-500" title="Server ID">
+                            <%= server.id.substring(0, 8) %>...
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Owner -->
+                    <td class="px-6 py-4">
+                      <% if (owner) { %>
+                        <div class="flex items-center gap-3">
+                          <img
+                            src="https://api.dicebear.com/9.x/notionists-neutral/svg?seed=<%= owner.username %>&backgroundColor=transparent"
+                            alt="Avatar" class="h-8 w-8 rounded-lg bg-neutral-900 object-cover p-0.5">
+                          <div class="flex flex-col">
+                            <span class="text-white font-medium">
+                              <%= owner.username %>
+                            </span>
+                            <span class="text-xs text-neutral-500">
+                              <%= owner.email %>
+                            </span>
+                          </div>
+                        </div>
+                        <% } else { %>
+                          <span class="text-neutral-500 italic">Unknown Owner</span>
+                          <% } %>
+                    </td>
+
+                    <!-- Status -->
+                    <td class="px-6 py-4">
+                      <% if (server.suspended) { %>
+                        <span
+                          class="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-bold text-red-500 border border-red-500/20 animate-pulse">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" x2="12" y1="8" y2="12" />
+                            <line x1="12" x2="12.01" y1="16" y2="16" />
+                          </svg>
+                          Suspended
                         </span>
-                      </div>
-                    </div>
-                  </div>
+                        <% } else { %>
+                          <span
+                            class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-500 border border-emerald-500/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                              class="h-3 w-3">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Active
+                          </span>
+                          <% } %>
+                    </td>
 
-                  <% if (server.suspended) { %>
-                    <div
-                      class="rounded-full bg-red-900/20 px-2 py-0.5 text-xs font-medium text-red-500 border border-red-900/30">
-                      Suspended
-                    </div>
+                    <!-- Node Info -->
+                    <td class="px-6 py-4">
+                      <div>
+                        <div class="text-sm font-medium text-white">
+                          <%= server.node?.name || 'Unknown' %>
+                        </div>
+                        <div class="font-mono text-xs text-neutral-500">
+                          <%= server.node?.ip %>:<%= server.port %>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="px-6 py-4 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <a href="/admin/server/edit/<%= server.id %>"
+                          class="group/btn relative flex items-center justify-center rounded-lg bg-neutral-900 border border-neutral-800 p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-all hover:scale-110 active:scale-95"
+                          title="Edit Server">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                          </svg>
+                        </a>
+
+                        <button onclick="toggleSuspend('<%= server.id %>', <%= server.suspended %>)"
+                          class="group/btn relative flex items-center justify-center rounded-lg bg-neutral-900 border border-neutral-800 p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-all hover:scale-110 active:scale-95"
+                          title="<%= server.suspended ? 'Unsuspend' : 'Suspend' %>">
+                          <% if (server.suspended) { %>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                              class="h-4 w-4 text-emerald-500">
+                              <polygon points="5 3 19 12 5 21 5 3" />
+                              <line x1="5" x2="19" y1="3" y2="21" />
+                            </svg>
+                            <% } else { %>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="h-4 w-4 text-yellow-500">
+                                <rect x="6" y="4" width="4" height="16" rx="1" />
+                                <rect x="14" y="4" width="4" height="16" rx="1" />
+                              </svg>
+                              <% } %>
+                        </button>
+
+                        <button onclick="deleteServer('<%= server.id %>')"
+                          class="group/btn relative flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-red-500 hover:bg-red-500 hover:text-white transition-all hover:scale-110 active:scale-95"
+                          title="Delete Server">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            <line x1="10" x2="10" y1="11" y2="17" />
+                            <line x1="14" x2="14" y1="11" y2="17" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }) %>
                     <% } else { %>
-                      <div
-                        class="rounded-full bg-emerald-900/20 px-2 py-0.5 text-xs font-medium text-emerald-500 border border-emerald-900/30">
-                        Active
-                      </div>
+                      <tr>
+                        <td colspan="5" class="px-6 py-24 text-center">
+                          <div class="flex flex-col items-center justify-center">
+                            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="h-6 w-6 text-neutral-500">
+                                <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+                                <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+                                <line x1="6" x2="6.01" y1="6" y2="6" />
+                                <line x1="6" x2="6.01" y1="18" y2="18" />
+                              </svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-white">No Servers Found</h3>
+                            <p class="mt-1 text-xs text-neutral-500">No servers have been created yet.</p>
+                          </div>
+                        </td>
+                      </tr>
                       <% } %>
-                </div>
+            </tbody>
+          </table>
 
-                <!-- Stats -->
-                <div class="mb-6 grid grid-cols-2 gap-4">
-                  <div class="rounded-lg bg-neutral-900/40 p-3">
-                    <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Node</p>
-                    <p class="text-sm font-bold text-white truncate">
-                      <%= server.node?.name || 'Unknown' %>
-                    </p>
-                  </div>
-                  <div class="rounded-lg bg-neutral-900/40 p-3">
-                    <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Connection</p>
-                    <p class="font-mono text-xs text-white truncate">
-                      <%= server.node?.ip %>:<%= server.port %>
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex items-center gap-2">
-                  <a href="/admin/server/edit/<%= server.id %>"
-                    class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-neutral-100 px-4 py-2 text-sm font-bold text-black transition-transform active:scale-95 hover:bg-white">
-                    Edit Server
-                  </a>
-
-                  <button onclick="toggleSuspend('<%= server.id %>', <%= server.suspended %>)"
-                    class="flex items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
-                    title="<%= server.suspended ? 'Unsuspend' : 'Suspend' %>">
-                    <% if (server.suspended) { %>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-4 w-4 text-emerald-500">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-                      </svg>
-                      <% } else { %>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                          stroke="currentColor" class="h-4 w-4 text-yellow-500">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-                        </svg>
-                        <% } %>
-                  </button>
-
-                  <button onclick="deleteServer('<%= server.id %>')"
-                    class="flex items-center justify-center rounded-lg border border-red-900/30 bg-red-900/10 px-3 py-2 text-red-500 hover:bg-red-900/20 hover:text-red-400 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                      stroke="currentColor" class="h-4 w-4">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                    </svg>
-                  </button>
-                </div>
-
-              </div>
-              <% }) %>
-          </div>
-          <% } else { %>
-            <!-- Empty State -->
-            <div
-              class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-800 bg-neutral-950/30 py-24 text-center">
-              <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                  stroke="currentColor" class="h-8 w-8 text-neutral-500">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" />
-                </svg>
-              </div>
-              <h3 class="text-xl font-bold text-white">No Servers Found</h3>
-              <p class="mt-2 max-w-sm text-neutral-500">No servers have been created yet.</p>
+          <!-- Empty State for Search -->
+          <div id="noSearchResults" class="hidden flex-col items-center justify-center py-24 text-center">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-neutral-500">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
             </div>
-            <% } %>
+            <h3 class="text-sm font-bold text-white">No Matches Found</h3>
+            <p class="mt-1 text-xs text-neutral-500">Try adjusting your search terms.</p>
+          </div>
+        </div>
 
       </div>
     </main>
 
     <script>
+      // Search Functionality
+      document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('searchInput');
+        const rows = document.querySelectorAll('.server-row');
+        const noResults = document.getElementById('noSearchResults');
+
+        searchInput.addEventListener('input', (e) => {
+          const term = e.target.value.toLowerCase().trim();
+          let hasVisible = false;
+
+          rows.forEach(row => {
+            const name = row.dataset.serverName || '';
+            const id = row.dataset.serverId || '';
+            const ownerName = row.dataset.ownerName || '';
+            const ownerEmail = row.dataset.ownerEmail || '';
+
+            if (name.includes(term) || id.includes(term) || ownerName.includes(term) || ownerEmail.includes(term)) {
+              row.style.display = '';
+              hasVisible = true;
+            } else {
+              row.style.display = 'none';
+            }
+          });
+
+          if (!hasVisible && rows.length > 0) {
+            noResults.classList.remove('hidden');
+            noResults.classList.add('flex');
+          } else {
+            noResults.classList.add('hidden');
+            noResults.classList.remove('flex');
+          }
+        });
+      });
+
       async function deleteServer(id) {
         if (!confirm("Are you sure you want to delete this server?")) return;
         const res = await fetch(`/admin/servers/delete/${id}`, {

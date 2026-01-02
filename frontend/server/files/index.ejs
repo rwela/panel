@@ -68,7 +68,7 @@
   <%- include('../../components/sidebar', { name: name, user: user }) %>
 
     <main class="relative flex-1 overflow-y-auto bg-black">
-      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12">
+      <div class="mx-auto max-w-7xl px-6 py-12 md:px-12 animate-fade-in-up">
 
         <!-- Header -->
         <div class="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
@@ -80,7 +80,7 @@
           <!-- Action Buttons -->
           <div class="flex flex-wrap gap-2">
             <button id="newFileBtn"
-              class="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm font-bold text-white hover:bg-neutral-800 transition-colors">
+              class="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm font-bold text-white hover:bg-neutral-800 hover:scale-105 active:scale-95 transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-4 w-4">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -89,7 +89,7 @@
               New File
             </button>
             <button id="newFolderBtn"
-              class="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm font-bold text-white hover:bg-neutral-800 transition-colors">
+              class="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm font-bold text-white hover:bg-neutral-800 hover:scale-105 active:scale-95 transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-4 w-4">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -98,7 +98,7 @@
               New Folder
             </button>
             <button id="uploadFileBtn"
-              class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-black hover:bg-neutral-200 transition-colors">
+              class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-black hover:bg-neutral-200 hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-white/20">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="h-4 w-4">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -112,7 +112,7 @@
 
         <!-- Navigation & Search Bar -->
         <div
-          class="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between rounded-xl border border-neutral-900 bg-neutral-950 p-3">
+          class="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between rounded-xl border border-neutral-900 bg-neutral-950 p-3 animate-scale-in delay-100">
           <!-- Breadcrumbs -->
           <div class="flex items-center gap-2 overflow-x-auto text-sm font-medium text-neutral-400 px-2 scrollbar-hide">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -145,18 +145,20 @@
                 d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
             <input id="searchInput" type="text" placeholder="Search files..."
-              class="w-full rounded-lg border border-neutral-800 bg-neutral-900 py-2 pl-9 pr-4 text-sm text-white placeholder-neutral-500 outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 transition-all" />
+              class="w-full rounded-lg border border-neutral-800 bg-neutral-900 py-2 pl-9 pr-4 text-sm text-white placeholder-neutral-500 outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 transition-all focus:scale-[1.02]" />
           </div>
         </div>
 
         <!-- Files List -->
-        <div class="overflow-hidden rounded-2xl border border-neutral-900 bg-neutral-950">
+        <div class="overflow-hidden rounded-2xl border border-neutral-900 bg-neutral-950 animate-scale-in delay-200">
           <table class="w-full text-left text-sm">
             <thead class="border-b border-neutral-900 bg-neutral-900/50 text-neutral-400">
               <tr>
                 <th class="w-10 px-4 py-3">
-                  <input id="selectAllCheckbox" type="checkbox"
-                    class="h-4 w-4 rounded border-neutral-700 bg-neutral-800 text-white focus:ring-0 focus:ring-offset-0" />
+                  <div class="flex items-center">
+                    <input id="selectAllCheckbox" type="checkbox"
+                      class="h-4 w-4 appearance-none rounded border border-neutral-700 bg-neutral-800 text-white checked:bg-white checked:border-white checked:bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5bGluZSBwb2ludHM9IjIwIDYgOSAxNyA0IDEyIj48L3BvbHlsaW5lPjwvc3ZnPg==')] checked:bg-center checked:bg-no-repeat transition-all cursor-pointer focus:ring-0 focus:ring-offset-0" />
+                  </div>
                 </th>
                 <th class="px-4 py-3 font-medium">Name</th>
                 <th class="px-4 py-3 font-medium">Size</th>
@@ -167,24 +169,30 @@
             <tbody id="filesTbody" class="divide-y divide-neutral-900">
               <% const sortedFiles=files.sort((a,b)=> (a.type === 'folder' && b.type !== 'folder') ? -1 : (a.type !==
                 'folder' && b.type === 'folder') ? 1 : 0);
-                sortedFiles.forEach(file => {
+                sortedFiles.forEach((file, index) => {
                 const isFolder = file.type === 'folder';
                 const isJar = file.name.toLowerCase().endsWith('.jar');
                 %>
-                <tr class="file-row group hover:bg-neutral-900/50 transition-colors" data-name="<%= file.name %>"
+                <!-- Staggered Row Animation -->
+                <tr class="file-row group hover:bg-neutral-900/50 transition-colors animate-fade-in-up"
+                  style="animation-delay: <%= Math.min(index * 30, 300) %>ms;" data-name="<%= file.name %>"
                   data-type="<%= file.type %>" data-path="<%= path === '/' ? '' : path + '/' %><%= file.name %>">
                   <td class="px-4 py-3">
-                    <input type="checkbox"
-                      class="row-checkbox h-4 w-4 rounded border-neutral-700 bg-neutral-800 text-white focus:ring-0 focus:ring-offset-0" />
+                    <div class="flex items-center">
+                      <input type="checkbox"
+                        class="row-checkbox h-4 w-4 appearance-none rounded border border-neutral-700 bg-neutral-800 text-white checked:bg-white checked:border-white checked:bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5bGluZSBwb2ludHM9IjIwIDYgOSAxNyA0IDEyIj48L3BvbHlsaW5lPjwvc3ZnPg==')] checked:bg-center checked:bg-no-repeat transition-all cursor-pointer focus:ring-0 focus:ring-offset-0" />
+                    </div>
                   </td>
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
                       <% if (isFolder) { %>
-                        <svg class="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                        <svg class="h-5 w-5 text-indigo-400 group-hover:scale-110 transition-transform"
+                          viewBox="0 0 20 20" fill="currentColor">
                           <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
                         </svg>
                         <% } else { %>
-                          <svg class="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
+                          <svg class="h-5 w-5 text-neutral-500 group-hover:scale-110 transition-transform"
+                            viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                               d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
                               clip-rule="evenodd" />
@@ -217,7 +225,8 @@
                     <%= new Date(file.createdAt).toLocaleDateString() %>
                   </td>
                   <td class="px-4 py-3 text-right relative">
-                    <button class="dropdownBtn p-1 text-neutral-500 hover:text-white transition-colors">
+                    <button
+                      class="dropdownBtn p-1 text-neutral-500 hover:text-white transition-colors hover:scale-110 active:scale-95">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="h-5 w-5">
                         <path stroke-linecap="round" stroke-linejoin="round"
