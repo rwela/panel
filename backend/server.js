@@ -79,7 +79,7 @@ async function createFileOnServer(server, node, filename, content, pathQuery = "
  * GET /server/manage/:id
  * Render server management page for a single server
  */
-router.get("/server/manage/:id", requireAuth, withServer, (req, res) => {
+router.get("/server/manage/:id", requireAuth, withServer, async (req, res) => {
   const user = unsqh.get("users", req.session.userId);
   if (!user) return res.redirect("/");
 
@@ -88,7 +88,33 @@ router.get("/server/manage/:id", requireAuth, withServer, (req, res) => {
   const image = unsqh.get("images", server.imageId);
   const settings = unsqh.get("settings", "app") || {};
   const appName = settings.name || "App";
-
+  
+  if (!server.node) {
+    return res.render("server/manage", {
+      name: appName,
+      user,
+      server,
+      image,
+    });
+  }
+  
+  const node = unsqh.list("nodes").find((n) => n.ip === server.node.ip);
+  let state = null;
+  
+  try {
+    const response = await axios.get(
+      `${getNodeUrl(node)}/server/${server.idt}/state`,
+      { params: { key: node.key } }
+    );
+    state = response.data.state;
+  } catch (err) {
+    state = "running";
+  }
+  
+  if (state === 'installing') {
+    return res.redirect('/server/installing/' + server.id);
+  }
+  
   res.render("server/manage", {
     name: appName,
     user,
@@ -97,6 +123,46 @@ router.get("/server/manage/:id", requireAuth, withServer, (req, res) => {
   });
 });
 
+/**
+ * GET /server/installing/:id
+ * Render server installing page for a single server
+ */
+router.get("/server/installing/:id", requireAuth, withServer, (req, res) => {
+  const user = unsqh.get("users", req.session.userId);
+  if (!user) return res.redirect("/");
+  const server = getServerForUser(req.session.userId, req.params.id);
+  const logAdd = router.bindLog(server.id);
+  const settings = unsqh.get("settings", "app") || {};
+  const appName = settings.name || "App";
+  res.render("server/installing", {
+    name: appName,
+    user,
+    server,
+  });
+});
+
+/**
+ * GET /server/state/:id
+ * gets the server current state
+ */
+router.get("/server/state/:id", requireAuth, withServer, async (req, res) => {
+  const server = getServerForUser(req.session.userId, req.params.id);
+  const logAdd = router.bindLog(server.id);
+  if (!server) return res.status(404).send("Server not found");
+  if (!server.node) return res.status(500).send("Server node not assigned");
+  const node = unsqh.list("nodes").find((n) => n.ip === server.node.ip);
+  let state = null;
+  try {
+    const response = await axios.get(
+      `${getNodeUrl(node)}/server/${server.idt}/state`,
+      { params: { key: node.key } }
+    );
+    state = response.data.state;
+  } catch (err) {
+    state = "running";
+  }
+  res.json({ state });
+});
 /**
  * POST /server/size/:id
  * gets the total server size
