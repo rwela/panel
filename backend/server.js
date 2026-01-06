@@ -677,7 +677,7 @@ router.post(
       unsqh.put("servers", server.id, adminServer);
     }
     logAdd(req.session.userId, `Updated environment variables`);
-    res.redirect(`/server/settings/${server.id}?env=saved`);
+    res.redirect(`/server/startup/${server.id}?env=saved`);
   }
 );
 
@@ -1135,7 +1135,27 @@ router.post(
   }
 );
 
+/**
+ * GET /server/startup/:id
+ * Render server startup page
+ */
+router.get("/server/startup/:id", requireAuth, withServer, (req, res) => {
+  const user = unsqh.get("users", req.session.userId);
+  if (!user) return res.redirect("/");
 
+  const server = getServerForUser(req.session.userId, req.params.id);
+  const logAdd = router.bindLog(server.id);
+  if (!server) return res.redirect("/dashboard");
+
+  const settings = unsqh.get("settings", "app") || {};
+  const appName = settings.name || "App";
+  res.render("server/startup", {
+    name: appName,
+    user,
+    server,
+    req
+  });
+});
 /**
  * addAuditLog(serverId, userId, action)
  * - Adds a single audit log entry to the canonical server record stored in unsqh.

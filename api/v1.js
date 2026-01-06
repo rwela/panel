@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const axios = require("axios");
 const router = express.Router();
 const unsqh = require("../modules/db.js");
+const { start } = require("repl");
 
 // --- Middleware: requireAPI
 function requireAPI(req, res, next) {
@@ -630,6 +631,8 @@ router.post(
         `${getNodeUrl(node)}/server/create?key=${node.key}`,
         {
           dockerimage: image.dockerImage,
+          startCmd: image.startCmd,
+          stopCmd: image.stopCmd,
           env: finalEnv,
           name,
           ram,

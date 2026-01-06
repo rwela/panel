@@ -105,7 +105,7 @@ const Logger = require("../modules/logger.js");
         if (!imageResp.ok) continue;
 
         const imageData = await imageResp.json();
-        const { dockerImage, name, description, envs, files, features, stopCmd } =
+        const { dockerImage, name, description, envs, files, features, startCmd, stopCmd } =
           imageData;
 
         if (!dockerImage || !name) continue;
@@ -121,13 +121,16 @@ const Logger = require("../modules/logger.js");
           envs: envs || {},
           files: files || [],
           features: Array.isArray(features) ? features : [],
+          startCmd: startCmd || "",
+          stopCmd: stopCmd || "",
         };
 
         if (existingImage) {
-          // Check if identical → skip
           const identical =
             existingImage.name === normalized.name &&
             existingImage.description === normalized.description &&
+            existingImage.startCmd === normalized.startCmd &&
+            existingImage.stopCmd === normalized.stopCmd &&
             JSON.stringify(existingImage.envs || {}) ===
               JSON.stringify(normalized.envs) &&
             JSON.stringify(existingImage.files || []) ===
@@ -139,7 +142,6 @@ const Logger = require("../modules/logger.js");
             continue;
           }
 
-          // UPDATE existing image (same ID)
           const updated = {
             ...existingImage,
             ...normalized,

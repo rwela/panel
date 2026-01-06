@@ -1067,6 +1067,8 @@ router.post(
         `http://${node.ip}:${node.port}/server/create?key=${node.key}`,
         {
           dockerimage: image.dockerImage,
+          startCmd: image.startCmd,
+          stopCmd: image.stopCmd,
           env: finalEnv,
           name,
           ram,

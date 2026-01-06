@@ -35,6 +35,8 @@
 
   <%- include('../../components/sidebar', { name, user }) %>
 
+
+
     <main class="relative flex-1 overflow-y-auto bg-black">
       <div class="mx-auto max-w-5xl px-6 py-12 md:px-12">
 
@@ -95,7 +97,7 @@
                 <%= image.description || 'No description provided.' %>
               </div>
             </div>
-
+    
             <!-- Environment Variables -->
             <div class="rounded-2xl border border-neutral-900 bg-neutral-950 p-6">
               <h2 class="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Environment Variables</h2>
@@ -189,10 +191,14 @@
                   <p class="text-sm italic text-neutral-500">No features.</p>
                   <% } %>
             </div>
-
+            <div class="rounded-2xl border border-neutral-900 bg-neutral-950 p-6">
+              <h2 class="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Start Command</h2>
+              <pre
+                class="whitespace-pre-wrap break-all rounded-lg bg-neutral-900/50 p-4 font-mono text-sm text-neutral-300"><%= image.startCmd || 'No start command configured.' %></pre>
+                <h2 class="mb-2 mt-2 text-xs font-bold uppercase tracking-wider text-neutral-500">Stop Command</h2>
+                <pre
+                class="whitespace-pre-wrap break-all rounded-lg bg-neutral-900/50 p-4 font-mono text-sm text-neutral-300"><%= image.stopCmd || 'No stop command configured.' %></pre>
           </div>
-
-        </div>
 
       </div>
     </main>
